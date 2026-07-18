@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayEdu — Console de test paiement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E14; --panel:#12161F; --panel-2:#171C27; --border:#232938;
+    --text:#E7EAF0; --muted:#7A8699; --mono:'JetBrains Mono', monospace;
+    --sans:'Inter', sans-serif;
+    --accent:#3FD6C6; --accent-dim:#1F4A46;
+    --warn:#F2A93B; --err:#F2685C; --ok:#3FD68C;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 24px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,#0D111A,#0B0E14);
+  }
+  header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.02em}
+  header h1 span{color:var(--accent);font-family:var(--mono)}
+  .base-url{display:flex;align-items:center;gap:8px}
+  .base-url input{
+    font-family:var(--mono);font-size:12px;background:var(--panel-2);
+    border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:6px;width:260px;
+  }
+  .role-badge{
+    font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:20px;
+    border:1px solid var(--border);color:var(--muted);
+  }
+  .role-badge.active{color:var(--accent);border-color:var(--accent-dim);background:rgba(63,214,198,.08)}
+  .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 57px)}
+  nav{border-right:1px solid var(--border);padding:18px 10px}
+  .step{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;
+    cursor:pointer;margin-bottom:2px;color:var(--muted);font-size:13px;
+  }
+  .step:hover{background:var(--panel-2)}
+  .step.active{background:var(--panel-2);color:var(--text)}
+  .step .num{
+    font-family:var(--mono);font-size:11px;width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--border);flex-shrink:0;
+  }
+  .step.done .num{background:var(--ok);border-color:var(--ok);color:#06140D}
+  .step.active .num{border-color:var(--accent);color:var(--accent)}
+  main{padding:24px 32px;display:flex;flex-direction:column;gap:20px;overflow:auto}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px}
+  .panel h2{font-size:16px;margin:0 0 4px}
+  .panel .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  label{display:block;font-size:12px;color:var(--muted);margin:14px 0 5px;font-family:var(--mono)}
+  input,select{
+    width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);
+    padding:9px 11px;border-radius:7px;font-size:13px;font-family:var(--sans);
+  }
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  button{
+    margin-top:18px;background:var(--accent);color:#04231F;border:none;font-weight:600;
+    padding:10px 18px;border-radius:7px;font-size:13px;cursor:pointer;
+  }
+  button:hover{filter:brightness(1.08)}
+  button.secondary{background:var(--panel-2);color:var(--text);border:1px solid var(--border)}
+  button.small{padding:6px 12px;font-size:12px;margin-top:0}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .totp-box{
+    display:flex;align-items:center;gap:14px;background:var(--panel-2);border:1px solid var(--accent-dim);
+    border-radius:8px;padding:14px 18px;margin:14px 0;
+  }
+  .totp-code{font-family:var(--mono);font-size:28px;letter-spacing:.15em;color:var(--accent)}
+  .totp-timer{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .qr-list{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .qr-chip{
+    font-family:var(--mono);font-size:11px;padding:8px 10px;border-radius:6px;
+    border:1px solid var(--border);background:var(--panel-2);cursor:pointer;
+  }
+  .qr-chip.scanned{border-color:var(--ok);color:var(--ok)}
+  #console{
+    background:#0A0D13;border-top:1px solid var(--border);padding:14px 24px;
+    max-height:230px;overflow:auto;font-family:var(--mono);font-size:12px;
+  }
+  #console .entry{padding:8px 0;border-bottom:1px solid #1A2030}
+  .method{font-weight:700;margin-right:8px}
+  .method.POST{color:var(--warn)} .method.GET{color:var(--accent)} .method.PATCH{color:#B98FF0}
+  .status-ok{color:var(--ok)} .status-err{color:var(--err)}
+  pre{margin:6px 0 0;color:var(--muted);white-space:pre-wrap;word-break:break-all}
+  .hint{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+  .hint code{background:var(--panel-2);padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pay<span>Edu</span> — console de test paiement</h1>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="base-url">
+      <label style="margin:0;font-size:11px">API</label>
+      <input id="baseUrl" value="http://localhost:8000" />
+    </div>
+    <span class="role-badge" id="roleBadge">non connecté</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main>
+    <div class="panel" id="panelHost"></div>
+  </main>
+</div>
+
+<div id="console"><div class="entry" style="color:var(--muted)">// les appels API apparaîtront ici</div></div>
+
+<script>
+const steps = [
+  {id:'setup', label:'Comptes (setup)'},
+  {id:'auth', label:'Connexion'},
+  {id:'form1', label:'Formulaire 1'},
+  {id:'form2', label:'Formulaire 2'},
+  {id:'form3', label:'Formulaire 3'},
+  {id:'recap', label:'Récapitulatif'},
+  {id:'autoriser', label:'Autorisation'},
+  {id:'statut', label:'Statut & webhook'},
+  {id:'caisse', label:'Caisse'},
+];
+let currentStep = 'setup';
+let state = { token:null, role:null, paiementId:null, totpSecret:null, referenceTransaction:null, scanned:new Set() };
+
+function baseUrl(){ return document.getElementById('baseUrl').value.replace(/\/$/,''); }
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  steps.forEach((s,i)=>{
+    const div = document.createElement('div');
+    div.className = 'step' + (s.id===currentStep?' active':'') + (isDone(s.id)?' done':'');
+    div.onclick = ()=>{ currentStep=s.id; render(); };
+    div.innerHTML = `<span class="num">${isDone(s.id)?'✓':String(i+1).padStart(2,'0')}</span> ${s.label}`;
+    nav.appendChild(div);
+  });
+}
+function isDone(id){
+  if(id==='auth') return !!state.token;
+  if(id==='form1') return !!state.paiementId;
+  if(id==='form2') return !!state.infosConfirmees;
+  if(id==='form3') return !!state.moyenDefini;
+  if(id==='autoriser') return !!state.paymentUrl;
+  return false;
+}
+
+async function appel(method, path, body, formEncoded=false){
+  const opts = { method, headers:{} };
+  if(state.token) opts.headers['Authorization'] = `Bearer ${state.token}`;
+  if(body){
+    if(formEncoded){
+      opts.headers['Content-Type']='application/x-www-form-urlencoded';
+      opts.body = new URLSearchParams(body).toString();
+    } else {
+      opts.headers['Content-Type']='application/json';
+      opts.body = JSON.stringify(body);
+    }
+  }
+  let res, data;
+  try{
+    res = await fetch(baseUrl()+path, opts);
+    data = await res.json().catch(()=>({}));
+  }catch(e){
+    logCall(method, path, 0, {erreur: 'Requête impossible — vérifie l\'URL et la config CORS de ton backend (allow_origins).'});
+    throw e;
+  }
+  logCall(method, path, res.status, data);
+  if(!res.ok) throw {status:res.status, data};
+  return data;
+}
+
+function logCall(method, path, status, data){
+  const el = document.getElementById('console');
+  const entry = document.createElement('div');
+  entry.className = 'entry';
+  const ok = status>=200 && status<300;
+  entry.innerHTML = `<span class="method ${method}">${method}</span>${path} — <span class="${ok?'status-ok':'status-err'}">${status||'ERR'}</span><pre>${JSON.stringify(data,null,2)}</pre>`;
+  el.appendChild(entry);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* --- TOTP (implémentation RFC 6238 en JS pur, pour générer un code sans téléphone) --- */
+function base32ToBytes(b32){
+  const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  b32=b32.replace(/=+$/,'').toUpperCase();
+  let bits='';
+  for(const c of b32){ const v=alphabet.indexOf(c); if(v===-1) continue; bits+=v.toString(2).padStart(5,'0'); }
+  const bytes=[];
+  for(let i=0;i+8<=bits.length;i+=8) bytes.push(parseInt(bits.substring(i,i+8),2));
+  return new Uint8Array(bytes);
+}
+async function genererTOTP(secretBase32){
+  const key = base32ToBytes(secretBase32);
+  const counter = Math.floor(Date.now()/1000/30);
+  const buf = new ArrayBuffer(8);
+  new DataView(buf).setUint32(4, counter);
+  const cryptoKey = await crypto.subtle.importKey('raw', key, {name:'HMAC', hash:'SHA-1'}, false, ['sign']);
+  const hmac = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, buf));
+  const offset = hmac[hmac.length-1] & 0xf;
+  const bin = ((hmac[offset]&0x7f)<<24)|((hmac[offset+1]&0xff)<<16)|((hmac[offset+2]&0xff)<<8)|(hmac[offset+3]&0xff);
+  return (bin % 1e6).toString().padStart(6,'0');
+}
+
+/* --- Rendu de chaque étape --- */
+function render(){
+  renderNav();
+  document.getElementById('roleBadge').textContent = state.role ? `${state.role} — connecté` : 'non connecté';
+  document.getElementById('roleBadge').className = 'role-badge' + (state.role ? ' active' : '');
+  const host = document.getElementById('panelHost');
+
+  const renderers = { setup:renderSetup, auth:renderAuth, form1:renderForm1, form2:renderForm2, form3:renderForm3, recap:renderRecap, autoriser:renderAutoriser, statut:renderStatut, caisse:renderCaisse };
+  host.innerHTML = '';
+  renderers[currentStep]();
+}
+
+function renderSetup(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>00 · Comptes (setup)</h2>
+    <p class="sub">Ordre obligatoire : Admin → Établissement → Apprenant / Caisse. Chaque bloc se connecte avec le compte qu'il vient de créer avant de passer au suivant.</p>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:6px">
+      <strong>1. Créer un admin</strong> (public, une seule fois)
+      <div class="row">
+        <div><label>Email</label><input id="s_admin_email" value="admin@payedu.cm" /></div>
+        <div><label>Mot de passe</label><input id="s_admin_mdp" type="password" value="MotDePasse123" /></div>
+      </div>
+      <div class="row">
+        <div><label>Nom</label><input id="s_admin_nom" value="Admin" /></div>
+        <div><label>Prénom</label><input id="s_admin_prenom" value="PayEdu" /></div>
+      </div>
+      <div class="actions"><button onclick="doCreerAdmin()">Créer l'admin</button>
+      <button class="secondary" onclick="doLoginRapide('s_admin_email','s_admin_mdp')">Se connecter comme admin</button></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px">
+      <strong>2. Créer un établissement</strong> (nécessite d'être connecté en admin — étape 1 ci-dessus)
+      <div class="row">
+        <div><label>Nom de l'établissement</label><input id="s_etab_nom" value="IUT de Douala" /></div>
+        <div><label>Code</label><input id="s_etab_code" value="IUT-DOUALA" /></div>
+      </div>
+      <div class="row">
+        <div><label>Email du compte gestionnaire</label><input id="s_etab_email" value="gestion@iutdouala.cm" /></div>
+        <div><label>Mot de passe</label><input id="s_etab_mdp" type="password" value="MotDePasse123" /></div>
+      </div>
+      <div class="row">
+        <div><label>Nom (personne)</label><input id="s_etab_pnom" value="Nkoulou" /></div>
+        <div><label>Prénom</label><input id="s_etab_pprenom" value="Jean" /></div>
+      </div>
+      <div class="actions"><button onclick="doCreerEtablissement()">Créer l'établissement</button>
+      <button class="secondary" onclick="doLoginRapide('s_etab_email','s_etab_mdp')">Se connecter comme établissement</button></div>
+      <div id="etabOut" class="hint"></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px">
+      <strong>3. Créer un apprenant</strong> (nécessite d'être connecté en établissement — étape 2 ci-dessus)
+      <label>ID établissement</label><input id="s_appr_etab" placeholder="rempli automatiquement après l'étape 2" />
+      <div class="row">
+        <div><label>Matricule</label><input id="s_appr_matricule" value="21T00123" /></div>
+        <div><label>Email (optionnel)</label><input id="s_appr_email" value="marie.fotso@etu.cm" /></div>
+      </div>
+      <div class="row">
+        <div><label>Mot de passe</label><input id="s_appr_mdp" type="password" value="MotDePasse123" /></div>
+        <div><label>Téléphone</label><input id="s_appr_tel" value="677123456" /></div>
+      </div>
+      <div class="row">
+        <div><label>Nom</label><input id="s_appr_nom" value="Fotso" /></div>
+        <div><label>Prénom</label><input id="s_appr_prenom" value="Marie" /></div>
+      </div>
+      <div class="actions"><button onclick="doCreerApprenant()">Créer l'apprenant</button></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px">
+      <strong>4. Créer une caisse</strong> (nécessite d'être connecté en établissement — étape 2 ci-dessus)
+      <label>ID établissement</label><input id="s_caisse_etab" placeholder="rempli automatiquement après l'étape 2" />
+      <div class="row">
+        <div><label>Email</label><input id="s_caisse_email" value="caisse1@iutdouala.cm" /></div>
+        <div><label>Mot de passe</label><input id="s_caisse_mdp" type="password" value="MotDePasse123" /></div>
+      </div>
+      <div class="row">
+        <div><label>Nom</label><input id="s_caisse_nom" value="Mballa" /></div>
+        <div><label>Prénom</label><input id="s_caisse_prenom" value="Paul" /></div>
+      </div>
+      <div class="actions"><button onclick="doCreerCaisse()">Créer la caisse</button></div>
+    </div>
+
+    <div class="hint" style="margin-top:20px">Une fois tes comptes créés, va à l'étape 01 · Connexion pour te connecter normalement avec l'apprenant (ou la caisse) et commencer le flux de paiement.</div>
+  `;
+}
+async function doLoginRapide(idEmailField, idMdpField){
+  const identifiant = document.getElementById(idEmailField).value;
+  const mot_de_passe = document.getElementById(idMdpField).value;
+  const data = await appel('POST','/auth/login',{identifiant, mot_de_passe});
+  state.token = data.access_token; state.role = data.role;
+  render();
+}
+async function doCreerAdmin(){
+  await appel('POST','/auth/register/admin',{
+    email: document.getElementById('s_admin_email').value,
+    mot_de_passe: document.getElementById('s_admin_mdp').value,
+    nom: document.getElementById('s_admin_nom').value,
+    prenom: document.getElementById('s_admin_prenom').value,
+  });
+}
+async function doCreerEtablissement(){
+  const data = await appel('POST','/auth/register/etablissement',{
+    nom_etablissement: document.getElementById('s_etab_nom').value,
+    code_etablissement: document.getElementById('s_etab_code').value,
+    email: document.getElementById('s_etab_email').value,
+    mot_de_passe: document.getElementById('s_etab_mdp').value,
+    nom: document.getElementById('s_etab_pnom').value,
+    prenom: document.getElementById('s_etab_pprenom').value,
+  });
+  document.getElementById('s_appr_etab').value = data.etablissement_id;
+  document.getElementById('s_caisse_etab').value = data.etablissement_id;
+  document.getElementById('etabOut').textContent = `ID établissement : ${data.etablissement_id} (copié dans les champs ci-dessous)`;
+}
+async function doCreerApprenant(){
+  await appel('POST','/auth/register/apprenant',{
+    etablissement_id: document.getElementById('s_appr_etab').value,
+    matricule: document.getElementById('s_appr_matricule').value,
+    email: document.getElementById('s_appr_email').value || null,
+    mot_de_passe: document.getElementById('s_appr_mdp').value,
+    telephone: document.getElementById('s_appr_tel').value,
+    nom: document.getElementById('s_appr_nom').value,
+    prenom: document.getElementById('s_appr_prenom').value,
+  });
+}
+async function doCreerCaisse(){
+  await appel('POST','/auth/register/caisse',{
+    etablissement_id: document.getElementById('s_caisse_etab').value,
+    email: document.getElementById('s_caisse_email').value,
+    mot_de_passe: document.getElementById('s_caisse_mdp').value,
+    nom: document.getElementById('s_caisse_nom').value,
+    prenom: document.getElementById('s_caisse_prenom').value,
+  });
+}
+
+function renderAuth(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>01 · Connexion</h2>
+    <p class="sub">Email ou matricule + mot de passe. Reconnecte-toi avec un compte caisse quand tu arrives à l'étape 08.</p>
+    <label>Identifiant</label><input id="identifiant" placeholder="matricule ou email" />
+    <label>Mot de passe</label><input id="mdp" type="password" />
+    <div class="actions"><button onclick="doLogin()">Se connecter</button></div>
+    ${state.token ? `
+      <div class="hint" style="margin-top:20px">Connecté. Récupère maintenant le secret TOTP de ce compte, en un clic (plus besoin de curl) :</div>
+      <div class="actions"><button class="secondary" onclick="doRecupererTotp()">Récupérer mon secret TOTP</button></div>
+      <div id="totpSetupOut"></div>
+    ` : `<div class="hint" style="margin-top:20px">Connecte-toi d'abord ci-dessus, le bouton pour récupérer le secret TOTP apparaîtra ensuite.</div>`}
+  `;
+}
+async function doLogin(){
+  const identifiant = document.getElementById('identifiant').value;
+  const mot_de_passe = document.getElementById('mdp').value;
+  const data = await appel('POST','/auth/login',{identifiant, mot_de_passe});
+  state.token = data.access_token; state.role = data.role;
+  render();
+}
+async function doRecupererTotp(){
+  const data = await appel('GET','/auth/totp/setup');
+  state.totpSecret = data.provisioning_uri.split('secret=')[1].split('&')[0];
+  document.getElementById('totpSetupOut').innerHTML = `
+    <p class="hint">Secret enregistré automatiquement : <code>${state.totpSecret}</code></p>
+    <img src="data:image/png;base64,${data.qrcode_base64}" style="width:160px;height:160px;margin-top:10px;border-radius:8px" alt="QR code TOTP" />
+    <p class="hint">Tu peux aussi scanner ce QR code avec Google Authenticator sur ton téléphone si tu préfères.</p>
+  `;
+}
+
+function renderForm1(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>02 · Formulaire 1 — Sélection du paiement</h2>
+    <p class="sub">POST /payments — établissement, objet, moyen de paiement.</p>
+    <label>ID établissement (UUID)</label><input id="etab" placeholder="uuid de l'établissement" />
+    <label>Objet du paiement</label>
+    <select id="objet">
+      <option value="frais_inscription">frais_inscription</option>
+      <option value="frais_pension">frais_pension</option>
+      <option value="frais_examen">frais_examen</option>
+    </select>
+    <label>Moyen de paiement</label>
+    <select id="moyen"><option value="orange_money">orange_money</option><option value="mtn_momo">mtn_momo</option><option value="carte_bancaire">carte_bancaire</option></select>
+    <div class="actions"><button onclick="doForm1()">Créer le brouillon</button></div>
+  `;
+}
+async function doForm1(){
+  const data = await appel('POST','/payments',{
+    etablissement_id: document.getElementById('etab').value,
+    objet_paiement: document.getElementById('objet').value,
+    moyen_paiement: document.getElementById('moyen').value,
+  });
+  state.paiementId = data.id;
+  state.moyenPaiement = document.getElementById('moyen').value;
+  currentStep='form2'; render();
+}
+
+function renderForm2(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>03 · Formulaire 2 — Vérification des informations</h2>
+    <p class="sub">PATCH /payments/${state.paiementId||'{id}'}/informations</p>
+    <div class="row">
+      <div><label>Nom</label><input id="nom" value="Fotso Marie" /></div>
+      <div><label>Matricule</label><input id="matricule" value="21T00123" /></div>
+    </div>
+    <div class="row">
+      <div><label>Filière</label><input id="filiere" value="Génie informatique" /></div>
+      <div><label>Niveau</label><input id="niveau" value="Licence 3" /></div>
+    </div>
+    <label>Date de naissance</label><input id="dateNaissance" value="2002-04-15" />
+    <div class="actions"><button onclick="doForm2()">Confirmer les informations</button></div>
+  `;
+}
+async function doForm2(){
+  const infos_confirmees = {
+    nom: document.getElementById('nom').value,
+    matricule: document.getElementById('matricule').value,
+    filiere: document.getElementById('filiere').value,
+    niveau: document.getElementById('niveau').value,
+    date_naissance: document.getElementById('dateNaissance').value,
+  };
+  await appel('PATCH',`/payments/${state.paiementId}/informations`,{infos_confirmees});
+  state.infosConfirmees = infos_confirmees;
+  currentStep='form3'; render();
+}
+
+function renderForm3(){
+  const host = document.getElementById('panelHost');
+  const estCarte = state.moyenPaiement === 'carte_bancaire';
+  host.innerHTML = `
+    <h2>04 · Formulaire 3 — ${estCarte ? 'Infos client (carte bancaire)' : 'Compte mobile money'}</h2>
+    <p class="sub">PATCH /payments/${state.paiementId||'{id}'}/moyen-paiement</p>
+    <label>Numéro de téléphone</label><input id="numero" value="677123456" />
+    ${estCarte ? `
+      <div class="hint">Univers carte bancaire chez CinetPay : ces infos servent à identifier le client, le numéro de carte lui-même sera saisi uniquement sur la page CinetPay.</div>
+      <label>Email</label><input id="emailPaiement" value="marie.fotso@etu.cm" />
+      <label>Adresse</label><input id="adressePaiement" value="Rue de la Joie, Akwa" />
+      <div class="row">
+        <div><label>Ville</label><input id="villePaiement" value="Douala" /></div>
+        <div><label>Code postal</label><input id="codePostalPaiement" value="00237" /></div>
+      </div>
+    ` : ''}
+    <div class="actions"><button onclick="doForm3()">Continuer</button></div>
+  `;
+}
+async function doForm3(){
+  const body = { numero_compte_paiement: document.getElementById('numero').value };
+  if(state.moyenPaiement === 'carte_bancaire'){
+    body.email_paiement = document.getElementById('emailPaiement').value;
+    body.adresse_paiement = document.getElementById('adressePaiement').value;
+    body.ville_paiement = document.getElementById('villePaiement').value;
+    body.code_postal_paiement = document.getElementById('codePostalPaiement').value;
+  }
+  await appel('PATCH',`/payments/${state.paiementId}/moyen-paiement`,body);
+  state.moyenDefini = true;
+  currentStep='recap'; render();
+}
+
+function renderRecap(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>05 · Récapitulatif</h2>
+    <p class="sub">GET /payments/${state.paiementId||'{id}'}/recapitulatif</p>
+    <div class="actions"><button onclick="doRecap()">Charger le récapitulatif</button></div>
+    <div id="recapOut"></div>
+  `;
+}
+async function doRecap(){
+  const data = await appel('GET',`/payments/${state.paiementId}/recapitulatif`);
+  document.getElementById('recapOut').innerHTML = `<pre style="margin-top:14px;color:var(--text)">${JSON.stringify(data,null,2)}</pre>`;
+}
+
+function renderAutoriser(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>06 · Autorisation finale</h2>
+    <p class="sub">POST /payments/${state.paiementId||'{id}'}/autoriser — code TOTP requis, initialise CinetPay.</p>
+    ${state.totpSecret ? `
+      <div class="totp-box">
+        <div>
+          <div class="totp-code" id="totpCode">------</div>
+          <div class="totp-timer" id="totpTimer">actualisation...</div>
+        </div>
+        <button class="secondary small" onclick="document.getElementById('codeTotp').value=document.getElementById('totpCode').textContent">Utiliser ce code</button>
+      </div>` : `<div class="hint">Aucun secret TOTP enregistré — retourne à l'étape 01 pour en coller un, ou saisis un code manuellement.</div>`}
+    <label>Code TOTP</label><input id="codeTotp" maxlength="6" placeholder="6 chiffres" />
+    <div class="actions"><button onclick="doAutoriser()">Autoriser le paiement</button></div>
+    <div id="autoriserOut"></div>
+  `;
+  if(state.totpSecret) demarrerHorlogeTOTP();
+}
+let totpInterval;
+function demarrerHorlogeTOTP(){
+  clearInterval(totpInterval);
+  const tick = async ()=>{
+    const code = await genererTOTP(state.totpSecret);
+    const el = document.getElementById('totpCode');
+    if(el) el.textContent = code.slice(0,3)+' '+code.slice(3);
+    const restant = 30 - (Math.floor(Date.now()/1000) % 30);
+    const timerEl = document.getElementById('totpTimer');
+    if(timerEl) timerEl.textContent = `expire dans ${restant}s`;
+  };
+  tick(); totpInterval = setInterval(tick, 1000);
+}
+async function doAutoriser(){
+  const data = await appel('POST',`/payments/${state.paiementId}/autoriser`,{code_totp: document.getElementById('codeTotp').value});
+  state.paymentUrl = data.payment_url;
+  document.getElementById('autoriserOut').innerHTML = `<p class="hint">payment_url reçue : <a href="${data.payment_url}" target="_blank" style="color:var(--accent)">${data.payment_url}</a></p>`;
+  currentStep='statut'; render();
+}
+
+function renderStatut(){
+  const host = document.getElementById('panelHost');
+  host.innerHTML = `
+    <h2>07 · Statut & simulation du webhook</h2>
+    <p class="sub">GET /payments/${state.paiementId||'{id}'} pour lire le statut courant, puis simule l'appel que CinetPay ferait sur ta notify_url.</p>
+    <div class="actions">
+      <button class="secondary" onclick="doStatut()">Rafraîchir le statut</button>
+      <button onclick="doWebhook()">Simuler le webhook CinetPay</button>
+    </div>
+    <div id="statutOut"></div>
+  `;
+}
+async function doStatut(){
+  const data = await appel('GET',`/payments/${state.paiementId}`);
+  state.referenceTransaction = data.reference_transaction;
+  document.getElementById('statutOut').innerHTML = `<pre style="margin-top:14px;color:var(--text)">${JSON.stringify(data,null,2)}</pre>`;
+}
+async function doWebhook(){
+  if(!state.referenceTransaction){ await doStatut(); }
+  await appel('POST','/payments/webhooks/cinetpay',{cpm_trans_id: state.referenceTransaction}, true);
+  await doStatut();
+}
+
+function renderCaisse(){
+  const host = document.getElementById('panelHost');
+  const types = ['infos_apprenant','compte_paiement','montant','identifiant_transaction'];
+  host.innerHTML = `
+    <h2>08 · Caisse</h2>
+    <p class="sub">Reconnecte-toi avec un compte rôle "caisse" à l'étape 01 avant d'utiliser cette section.</p>
+    <div class="actions"><button class="secondary" onclick="doQueue()">Charger la file d'attente</button></div>
+    <div id="queueOut"></div>
+    <label style="margin-top:20px">Paiement à traiter (ID)</label><input id="caisseId" value="${state.paiementId||''}" />
+    <label>Scanner un QR code</label>
+    <div class="qr-list">${types.map(t=>`<div class="qr-chip" id="chip-${t}" onclick="doScan('${t}')">${t}</div>`).join('')}</div>
+    <div class="actions"><button onclick="doFinaliser()">Finaliser (facture acquittée)</button></div>
+    <div id="caisseOut"></div>
+  `;
+}
+async function doQueue(){
+  const data = await appel('GET','/payments/caisse/queue');
+  document.getElementById('queueOut').innerHTML = `<pre style="margin-top:14px;color:var(--text)">${JSON.stringify(data,null,2)}</pre>`;
+}
+async function doScan(type){
+  const id = document.getElementById('caisseId').value;
+  await appel('POST',`/payments/caisse/${id}/scan/${type}`);
+  document.getElementById(`chip-${type}`).classList.add('scanned');
+}
+async function doFinaliser(){
+  const id = document.getElementById('caisseId').value;
+  const data = await appel('POST',`/payments/caisse/${id}/finaliser`);
+  document.getElementById('caisseOut').innerHTML = `<pre style="margin-top:14px;color:var(--ok)">${JSON.stringify(data,null,2)}</pre>`;
+}
+
+render();
+</script>
+</body>
+</html>

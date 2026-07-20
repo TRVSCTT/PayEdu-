@@ -1,137 +1,100 @@
-/**
- * CreatePaymentPage.jsx
- * Rôle : Page permettant à l'apprenant d'initier un paiement (brouillon).
- */
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'sonner';
-import { paymentSchema } from '../schemas/paymentSchema';
-import { useCreatePayment } from '../hooks/useCreatePayment';
-import { handleApiError } from '../../../utils/handleApiError';
-import { DashboardLayout } from '../../../components/layout/DashboardLayout';
-import { useAuth } from '../../../store/authStore';
-import { Loader2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 
-// Tarifs indicatifs côté frontend. Le backend est la source de vérité.
-const TARIFS_INDICATIFS = {
-  frais_inscription: 45000,
-  frais_pension: 150000,
-  frais_examen: 10000,
-};
+const FEES = [
+  { id: 'is', title: 'Inscription spéciale', date: '30 sept 2026', amount: 5000 },
+  { id: 'p1', title: 'Pension - Tranche 1', date: '30 sept 2026', amount: 350000 },
+  { id: 'p2', title: 'Pension - Tranche 2', date: '10 fev 2027', amount: 200000 },
+  { id: 'vm', title: 'Visite médicale', date: '30 sept 2026', amount: 5000 },
+  { id: 'ce', title: 'Carte étudiant', date: '30 sept 2026', amount: 5000 },
+];
 
 export function CreatePaymentPage() {
   const navigate = useNavigate();
-  const { user } = useAuth(); // On aura besoin de son etablissement_id, on suppose qu'il est dans user.etablissement_id ou qu'on le récupère du store
-  const { mutateAsync: performCreate, isPending } = useCreatePayment();
+  const [selectedFees, setSelectedFees] = useState([]);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors }
-  } = useForm({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: {
-      montant: 0,
-    }
-  });
+  const toggleFee = (id) => {
+    setSelectedFees(prev => 
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    );
+  };
 
-  const objetPaiement = watch("objet_paiement");
+  const totalAmount = selectedFees.reduce((sum, id) => {
+    const fee = FEES.find(f => f.id === id);
+    return sum + (fee ? fee.amount : 0);
+  }, 0);
 
-  // Mise à jour automatique du montant indicatif selon l'objet sélectionné
-  useEffect(() => {
-    if (objetPaiement && TARIFS_INDICATIFS[objetPaiement]) {
-      setValue("montant", TARIFS_INDICATIFS[objetPaiement]);
-    }
-  }, [objetPaiement, setValue]);
-
-  const onSubmit = async (data) => {
-    try {
-      const payload = {
-        ...data,
-        etablissement_id: user.sub, // Attention: L'apprenant a un etablissement_id. On suppose ici que user.sub de l'apprenant contient l'id ou qu'il faudra le fetch.
-        // Si le backend exige l'etablissement_id, on l'envoie.
-      };
-      
-      const response = await performCreate(payload);
-      toast.success("Brouillon de paiement initié avec succès !");
-      
-      // On redirige vers la page de brouillon avec les détails retournés par l'API
-      navigate(`/apprenant/paiements/brouillon/${response.id}`, { state: { payment: response } });
-    } catch (error) {
-      const apiError = handleApiError(error);
-      toast.error(apiError.message);
-    }
+  const handleContinue = () => {
+    // Logique de navigation vers la prochaine étape
+    // ex: navigate('/apprenant/paiements/moyen-paiement', { state: { totalAmount, selectedFees } })
   };
 
   return (
-    <DashboardLayout title="Initier un Paiement">
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6 max-w-xl mx-auto">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Objet du paiement</label>
-            <select
-              {...register('objet_paiement')}
-              className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border ${errors.objet_paiement ? 'border-danger-DEFAULT' : 'border-gray-border'} focus:outline-none focus:ring-primary-DEFAULT focus:border-primary-DEFAULT sm:text-sm rounded-md`}
-            >
-              <option value="">Sélectionnez un objet</option>
-              <option value="frais_inscription">Frais d'inscription</option>
-              <option value="frais_pension">Frais de pension</option>
-              <option value="frais_examen">Frais d'examen</option>
-            </select>
-            {errors.objet_paiement && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.objet_paiement.message}</p>}
-          </div>
+    <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
+      <div className="px-6 py-4 max-w-lg mx-auto">
+        
+        {/* Top Tabs (Payer, Portefeuille, Histoire, RDV) */}
+        <div className="flex bg-white rounded-2xl border border-gray-200 p-1.5 mb-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <button className="flex-1 bg-black text-white rounded-xl py-2.5 text-sm font-medium">Payer</button>
+          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Portefeuille</button>
+          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Histoire</button>
+          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">RDV</button>
+        </div>
+        
+        {/* Progress bar */}
+        <div className="flex space-x-1.5 mb-6 px-1">
+          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
+          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
+          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
+          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Montant indicatif (XAF)</label>
-            <input
-              type="number"
-              disabled
-              {...register('montant')}
-              className="mt-1 block w-full px-3 py-2 border border-gray-border bg-gray-50 rounded-md shadow-sm sm:text-sm text-gray-500 cursor-not-allowed"
-            />
-            <p className="mt-1 text-xs text-gray-500">Le montant définitif sera appliqué par l'établissement.</p>
-          </div>
+        {/* Back and Title */}
+        <div className="flex items-center space-x-4 mb-6">
+          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center bg-white hover:bg-gray-50 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-black" />
+          </button>
+          <h2 className="text-[17px] font-medium text-gray-900">Choix des frais à payer</h2>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Moyen de paiement souhaité</label>
-            <select
-              {...register('moyen_paiement')}
-              className={`mt-1 block w-full pl-3 pr-10 py-2 text-base border ${errors.moyen_paiement ? 'border-danger-DEFAULT' : 'border-gray-border'} focus:outline-none focus:ring-primary-DEFAULT focus:border-primary-DEFAULT sm:text-sm rounded-md`}
+        {/* Fees List */}
+        <div className="space-y-3">
+          {FEES.map(fee => (
+            <div 
+              key={fee.id} 
+              onClick={() => toggleFee(fee.id)}
+              className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer hover:border-gray-300 transition-colors"
             >
-              <option value="">Sélectionnez un moyen</option>
-              <option value="orange_money">Orange Money</option>
-              <option value="mtn_momo">MTN Mobile Money</option>
-              <option value="carte_bancaire">Carte Bancaire</option>
-            </select>
-            {errors.moyen_paiement && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.moyen_paiement.message}</p>}
-          </div>
+              <div className="mr-4 flex-shrink-0">
+                <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${selectedFees.includes(fee.id) ? 'bg-black border-black' : 'border-gray-400 bg-white'}`}>
+                  {selectedFees.includes(fee.id) && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-[15px] font-medium text-gray-900 leading-tight">{fee.title}</h3>
+                <p className="text-[12px] text-gray-500 mt-1">Échéance {fee.date}</p>
+              </div>
+              <div className="text-right flex-shrink-0 pl-2">
+                <p className="text-[15px] font-medium text-gray-900">{fee.amount.toLocaleString('fr-FR')} FCFA</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-          <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t border-gray-border">
-            <Link
-              to="/apprenant"
-              className="w-full sm:w-auto text-center px-4 py-2 border border-gray-border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
-            >
-              Annuler
-            </Link>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-DEFAULT hover:bg-primary-dark disabled:opacity-50"
-            >
-              {isPending ? (
-                <><Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> Initiation...</>
-              ) : (
-                "Valider le brouillon"
-              )}
-            </button>
-          </div>
-        </form>
+        {/* Bottom Section */}
+        <div className="mt-8 mb-5 flex justify-between items-center px-1">
+          <span className="text-[17px] font-medium text-gray-900">Total sélectionné</span>
+          <span className="text-[17px] font-medium text-gray-900">{totalAmount.toLocaleString('fr-FR')} FCFA</span>
+        </div>
+
+        <button 
+          onClick={handleContinue}
+          className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
+        >
+          Continuer
+        </button>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

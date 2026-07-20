@@ -4,6 +4,8 @@ import { PublicRoute } from './PublicRoute';
 import { RoleRoute } from './RoleRoute';
 import { USER_ROLES } from '../../constants/roles';
 
+import { DashboardLayout } from '../../components/layout/DashboardLayout';
+import { LearnerLayout } from '../../components/layout/LearnerLayout';
 import { AuthLayout } from '../../components/layout/AuthLayout';
 import { LoginPage } from '../../features/auth/pages/LoginPage';
 import { RegisterAdminPage } from '../../features/auth/pages/RegisterAdminPage';
@@ -14,6 +16,8 @@ import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearn
 import { LearnerDashboard } from '../../features/learners/pages/LearnerDashboard';
 import { CreatePaymentPage } from '../../features/payments/pages/CreatePaymentPage';
 import { PaymentDraftPage } from '../../features/payments/pages/PaymentDraftPage';
+import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecurityPage';
+import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
 
 export function AppRouter() {
   return (
@@ -87,9 +91,13 @@ export function AppRouter() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={[USER_ROLES.LEARNER]}>
                 <Routes>
-                  <Route path="/" element={<LearnerDashboard />} />
-                  <Route path="/paiements/nouveau" element={<CreatePaymentPage />} />
-                  <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
+                  <Route element={<LearnerLayout />}>
+                    <Route path="/" element={<LearnerDashboard />} />
+                    <Route path="/paiements" element={<PaymentSecurityPage />} />
+                    <Route path="/paiements/nouveau" element={<CreatePaymentPage />} />
+                    <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
+                  </Route>
+                  <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>
               </RoleRoute>
             </ProtectedRoute>

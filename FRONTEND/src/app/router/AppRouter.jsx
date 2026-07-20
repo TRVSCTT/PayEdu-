@@ -15,6 +15,9 @@ import { EstablishmentDashboard } from '../../features/establishments/pages/Esta
 import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearnerPage';
 import { LearnerDashboard } from '../../features/learners/pages/LearnerDashboard';
 import { CreatePaymentPage } from '../../features/payments/pages/CreatePaymentPage';
+import { UploadReceiptPage } from '../../features/payments/pages/UploadReceiptPage';
+import { SelectPaymentMethodPage } from '../../features/payments/pages/SelectPaymentMethodPage';
+import { PaymentOptionsPage } from '../../features/payments/pages/PaymentOptionsPage';
 import { PaymentDraftPage } from '../../features/payments/pages/PaymentDraftPage';
 import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecurityPage';
 import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
@@ -95,6 +98,9 @@ export function AppRouter() {
                     <Route path="/" element={<LearnerDashboard />} />
                     <Route path="/paiements" element={<PaymentSecurityPage />} />
                     <Route path="/paiements/nouveau" element={<CreatePaymentPage />} />
+                    <Route path="/paiements/quitus" element={<UploadReceiptPage />} />
+                    <Route path="/paiements/methode" element={<SelectPaymentMethodPage />} />
+                    <Route path="/paiements/options" element={<PaymentOptionsPage />} />
                     <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />

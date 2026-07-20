@@ -26,8 +26,7 @@ export function CreatePaymentPage() {
   }, 0);
 
   const handleContinue = () => {
-    // Logique de navigation vers la prochaine étape
-    // ex: navigate('/apprenant/paiements/moyen-paiement', { state: { totalAmount, selectedFees } })
+    navigate('/apprenant/paiements/quitus', { state: { totalAmount, selectedFees } });
   };
 
   return (

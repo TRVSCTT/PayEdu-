@@ -27,7 +27,7 @@ class EtablissementCreate(BaseModel):
 
 
 class ApprenantCreate(BaseModel):
-    etablissement_id: uuid.UUID
+    etablissement_id: Optional[uuid.UUID] = None
     matricule: str = Field(..., max_length=30)
     email: Optional[EmailStr] = None
     mot_de_passe: str = Field(..., min_length=8)

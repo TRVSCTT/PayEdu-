@@ -56,7 +56,6 @@ def creer_etablissement(
 def creer_apprenant(
     data: ApprenantCreate,
     db: Session = Depends(get_db),
-    etablissement: User = Depends(get_current_etablissement),
 ):
     return  user_service.creer_apprenant(db, data)
 

@@ -55,7 +55,7 @@ class PaiementRecapitulatif(BaseModel):
 
 class PaiementAutorisation(BaseModel):
     """Autorisation finale : code TOTP généré par l'application tierce de l'établissement."""
-    code_totp: str = Field(..., min_length=6, max_length=6)
+    code_totp: str = Field(..., min_length=4, max_length=6)
 
 class PaiementAutorisationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -1,23 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2, Delete } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePaymentContext } from './../context/PaymentContext';
+import { paymentService } from '../../../services/paymentService';
 
 export function PaymentSummaryPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { paymentData } = usePaymentContext();
+  
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [pinCode, setPinCode] = useState('');
+  const [summaryData, setSummaryData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Default to orange (4 digits) if no operator passed
-  const operator = location.state?.operator?.toLowerCase() || 'orange';
-  const pinLength = operator === 'mtn' ? 5 : 4;
+  const operator = location.state?.operator?.toLowerCase() || paymentData.moyen_paiement || 'orange';
+  const pinLength = operator.includes('mtn') ? 5 : 4;
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      if (!paymentData.paiement_id) return;
+      try {
+        const data = await paymentService.obtenirRecapitulatif(paymentData.paiement_id);
+        setSummaryData(data);
+      } catch (error) {
+        toast.error("Erreur lors de la récupération du récapitulatif");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSummary();
+  }, [paymentData.paiement_id]);
 
   const handlePayClick = () => {
     setShowSecurityModal(true);
   };
 
-  const handleKeypadPress = (val) => {
+  const handleKeypadPress = async (val) => {
     if (val === 'delete') {
       setPinCode(prev => prev.slice(0, -1));
     } else {
@@ -27,14 +48,30 @@ export function PaymentSummaryPage() {
         
         // Auto submit if required digits reached
         if (newPin.length === pinLength) {
-          setTimeout(() => {
+          try {
+            // Convert to string of appropriate length
+            const response = await paymentService.autoriserPaiement(paymentData.paiement_id, {
+              code_totp: newPin.padStart(pinLength, '0') // backend allows 4 to 6 chars
+            });
+            
             setShowSecurityModal(false);
-            navigate('/apprenant/paiements/succes');
-          }, 500);
+            if (response.payment_url) {
+               window.location.href = response.payment_url;
+            } else {
+               navigate('/apprenant/paiements/succes');
+            }
+          } catch (error) {
+             setPinCode('');
+             toast.error(error.response?.data?.detail || "Code de sécurité invalide");
+          }
         }
       }
     }
   };
+
+  if (isLoading && paymentData.paiement_id) {
+    return <div className="flex items-center justify-center min-h-screen text-black">Chargement du récapitulatif...</div>;
+  }
 
   return (
     <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
@@ -87,8 +124,8 @@ export function PaymentSummaryPage() {
                   </div>
                 </div>
                 <div className="flex-1 text-right">
-                  <p className="text-sm font-medium">Inscription - Tranche 1</p>
-                  <p className="text-xl font-semibold mt-0.5">350 000 FCFA</p>
+                  <p className="text-sm font-medium">{summaryData ? summaryData.objet_paiement : paymentData.objet_paiement}</p>
+                  <p className="text-xl font-semibold mt-0.5">{summaryData ? summaryData.montant : paymentData.montant_total} FCFA</p>
                   <p className="text-xs text-gray-300 mt-2 hover:text-white cursor-pointer transition-colors">
                     Afficher les détails
                   </p>
@@ -98,12 +135,12 @@ export function PaymentSummaryPage() {
 
             <div className="flex justify-between items-center pt-2">
               <span className="text-[16px] text-gray-700">Moyen</span>
-              <span className="text-[16px] font-medium text-gray-900">OM</span>
+              <span className="text-[16px] font-medium text-gray-900">{summaryData ? summaryData.moyen_paiement : paymentData.moyen_paiement}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-[16px] text-gray-700">Date</span>
-              <span className="text-[16px] font-medium text-gray-900">30 sept 2026</span>
+              <span className="text-[16px] font-medium text-gray-900">{new Date().toLocaleDateString('fr-FR')}</span>
             </div>
             
             <div className="flex justify-between items-center">
@@ -116,7 +153,7 @@ export function PaymentSummaryPage() {
           <div className="border-t border-gray-200 p-5 bg-gray-50/50">
             <div className="flex justify-between items-center">
               <span className="text-[18px] text-gray-900">Total</span>
-              <span className="text-[18px] font-medium text-gray-900">350 000 FCFA</span>
+              <span className="text-[18px] font-medium text-gray-900">{summaryData ? summaryData.montant : paymentData.montant_total} FCFA</span>
             </div>
           </div>
         </div>
@@ -126,7 +163,7 @@ export function PaymentSummaryPage() {
           onClick={handlePayClick}
           className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
         >
-          Payer 350 000 FCFA
+          Payer {summaryData ? summaryData.montant : paymentData.montant_total} FCFA
         </button>
 
       </div>

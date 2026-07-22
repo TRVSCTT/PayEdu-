@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { usePaymentContext } from './../context/PaymentContext';
 
 const FEES = [
   { id: 'is', title: 'Inscription spéciale', date: '30 sept 2026', amount: 5000 },
@@ -12,6 +13,7 @@ const FEES = [
 
 export function CreatePaymentPage() {
   const navigate = useNavigate();
+  const { updatePaymentData } = usePaymentContext();
   const [selectedFees, setSelectedFees] = useState([]);
 
   const toggleFee = (id) => {
@@ -26,6 +28,13 @@ export function CreatePaymentPage() {
   }, 0);
 
   const handleContinue = () => {
+    // Set the chosen fees in context
+    const objetPaiement = selectedFees.map(id => FEES.find(f => f.id === id)?.title).join(', ');
+    updatePaymentData({
+      objet_paiement: objetPaiement || 'Frais de scolarité',
+      montant_total: totalAmount
+    });
+    
     navigate('/apprenant/paiements/quitus', { state: { totalAmount, selectedFees } });
   };
 

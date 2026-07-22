@@ -1,16 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { usePaymentContext } from './../context/PaymentContext';
+import { paymentService } from '../../../services/paymentService';
+import { toast } from 'sonner';
 
 export function PaymentOptionsPage() {
   const navigate = useNavigate();
+  const { paymentData, updatePaymentData } = usePaymentContext();
+  
   const [optionType, setOptionType] = useState('mobile'); // 'mobile' or 'carte'
   const [selectedSavedCard, setSelectedSavedCard] = useState(null);
   const [operator, setOperator] = useState('Orange');
+  const [numero, setNumero] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
-  const handleContinue = () => {
+  useEffect(() => {
+    // Fetch profile to get etablissement_id
+    paymentService.obtenirProfil().then(setUserProfile).catch(console.error);
+  }, []);
+
+  const handleContinue = async () => {
+    if (!userProfile?.etablissement_id) {
+      toast.error("Impossible de récupérer l'établissement. Êtes-vous connecté ?");
+      return;
+    }
+
     const finalOperator = selectedSavedCard ? selectedSavedCard : operator;
-    navigate('/apprenant/paiements/recapitulatif', { state: { operator: finalOperator } });
+    const finalNumero = selectedSavedCard ? (selectedSavedCard === 'orange' ? '600000000' : '650000000') : numero; // mock numero for saved cards for now
+    
+    if (optionType === 'mobile' && !selectedSavedCard && !finalNumero) {
+      toast.error('Veuillez entrer un numéro de compte valide');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const moyenPaiementBackend = finalOperator.toLowerCase() === 'orange' ? 'orange_money' : 'mtn_momo';
+      
+      // 1. Initier le paiement (Formulaire 1)
+      const paiement = await paymentService.initierPaiement({
+        etablissement_id: userProfile.etablissement_id,
+        objet_paiement: paymentData.objet_paiement || 'Frais divers',
+        moyen_paiement: moyenPaiementBackend
+      });
+
+      // 2. Définir le numéro de compte (Formulaire 3)
+      await paymentService.definirMoyenPaiement(paiement.id, {
+        numero_compte_paiement: finalNumero
+      });
+
+      updatePaymentData({ 
+        paiement_id: paiement.id,
+        moyen_paiement: moyenPaiementBackend,
+        numero_compte_paiement: finalNumero 
+      });
+
+      navigate('/apprenant/paiements/recapitulatif', { state: { operator: finalOperator } });
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.detail || "Erreur lors de l'initialisation du paiement");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -82,6 +135,8 @@ export function PaymentOptionsPage() {
                 <input 
                   type="text" 
                   placeholder="6XX XX XX XX" 
+                  value={numero}
+                  onChange={(e) => setNumero(e.target.value)}
                   className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                 />
               </div>

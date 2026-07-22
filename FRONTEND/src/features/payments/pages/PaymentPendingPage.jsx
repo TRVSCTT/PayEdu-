@@ -29,7 +29,7 @@ export function PaymentPendingPage() {
           <div className="w-2.5 h-2.5 rounded-full border-2 border-gray-400 bg-white"></div>
         </div>
         <button 
-          onClick={() => navigate('/apprenant')}
+          onClick={() => navigate('/apprenant/paiements/rendez-vous')}
           className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
         >
           Continuer

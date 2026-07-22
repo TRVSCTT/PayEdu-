@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Calendar } from 'lucide-react';
 import { TopNavTabs } from '../../../components/ui/TopNavTabs';
 
 export function AddPaymentMethodPage() {
@@ -51,44 +51,98 @@ export function AddPaymentMethodPage() {
           </div>
 
           <form className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1.5">Opérateur</label>
-                <select 
-                  value={operator}
-                  onChange={(e) => setOperator(e.target.value)}
-                  className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none bg-white text-sm"
-                >
-                  <option value="Orange">Orange</option>
-                  <option value="MTN">MTN</option>
-                  <option value="Camtel">Camtel</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1.5">Numéro</label>
-                <input 
-                  type="text" 
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="6XX XX XX XX"
-                  className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-sm"
-                />
-              </div>
-            </div>
+            {methodType === 'mobile' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1.5">Opérateur</label>
+                    <select 
+                      value={operator}
+                      onChange={(e) => setOperator(e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none bg-white text-sm"
+                    >
+                      <option value="Orange">Orange</option>
+                      <option value="MTN">MTN</option>
+                      <option value="Camtel">Camtel</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1.5">Numéro</label>
+                    <input 
+                      type="text" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="6XX XX XX XX"
+                      className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-sm"
+                    />
+                  </div>
+                </div>
 
-            <div>
-              <label className="block text-xs text-gray-600 mb-1.5">Origine des fonds</label>
-              <select 
-                value={fundsOrigin}
-                onChange={(e) => setFundsOrigin(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none bg-white text-sm"
-              >
-                <option value=""></option>
-                <option value="Personnel">Personnel</option>
-                <option value="Parent">Parent</option>
-                <option value="Autre">Autre</option>
-              </select>
-            </div>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1.5">Origine des fonds</label>
+                  <select 
+                    value={fundsOrigin}
+                    onChange={(e) => setFundsOrigin(e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none bg-white text-sm"
+                  >
+                    <option value=""></option>
+                    <option value="Personnel">Personnel</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-1">
+                    <label className="block text-xs text-gray-600 mb-1.5">Opérateur</label>
+                    <input 
+                      type="text" 
+                      placeholder="0000 0000 0000 0000"
+                      className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-sm"
+                    />
+                  </div>
+                  <div className="col-span-1 relative">
+                    <label className="block text-xs text-gray-600 mb-1.5">Numéro</label>
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        placeholder="MM/AA"
+                        className="w-full pl-3 pr-10 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-sm"
+                      />
+                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <Calendar className="w-5 h-5 text-gray-500" strokeWidth={1.5} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-1">
+                    <label className="block text-xs text-gray-600 mb-1.5">CVV</label>
+                    <input 
+                      type="text" 
+                      placeholder="..."
+                      className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-sm"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs text-gray-600 mb-1.5">Origine des fonds</label>
+                    <select 
+                      value={fundsOrigin}
+                      onChange={(e) => setFundsOrigin(e.target.value)}
+                      className="w-full px-3 py-3 border border-gray-400 rounded-xl focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none bg-white text-sm"
+                    >
+                      <option value=""></option>
+                      <option value="Personnel">Personnel</option>
+                      <option value="Parent">Parent</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-xs text-gray-600 mb-1.5">Nom du titulaire</label>

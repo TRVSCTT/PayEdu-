@@ -8,8 +8,7 @@ export function PaymentOptionsPage() {
   const [selectedSavedCard, setSelectedSavedCard] = useState(null);
 
   const handleContinue = () => {
-    // Logique de validation et passage à la prochaine étape (ex: récapitulatif/brouillon)
-    // navigate('/apprenant/paiements/brouillon/123')
+    navigate('/apprenant/paiements/recapitulatif');
   };
 
   return (

@@ -18,6 +18,7 @@ import { CreatePaymentPage } from '../../features/payments/pages/CreatePaymentPa
 import { UploadReceiptPage } from '../../features/payments/pages/UploadReceiptPage';
 import { SelectPaymentMethodPage } from '../../features/payments/pages/SelectPaymentMethodPage';
 import { PaymentOptionsPage } from '../../features/payments/pages/PaymentOptionsPage';
+import { PaymentSummaryPage } from '../../features/payments/pages/PaymentSummaryPage';
 import { PaymentDraftPage } from '../../features/payments/pages/PaymentDraftPage';
 import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecurityPage';
 import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
@@ -101,6 +102,7 @@ export function AppRouter() {
                     <Route path="/paiements/quitus" element={<UploadReceiptPage />} />
                     <Route path="/paiements/methode" element={<SelectPaymentMethodPage />} />
                     <Route path="/paiements/options" element={<PaymentOptionsPage />} />
+                    <Route path="/paiements/recapitulatif" element={<PaymentSummaryPage />} />
                     <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />

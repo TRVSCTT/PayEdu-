@@ -4,6 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import { usePaymentContext } from './../context/PaymentContext';
 import { fraisService } from '../../../services/fraisService';
 import { paymentService } from '../../../services/paymentService';
+import { TopNavTabs } from '../../../components/ui/TopNavTabs';
 
 export function CreatePaymentPage() {
   const navigate = useNavigate();
@@ -60,13 +61,8 @@ export function CreatePaymentPage() {
     <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
       <div className="px-6 py-4 max-w-lg mx-auto">
         
-        {/* Top Tabs (Payer, Portefeuille, Histoire, RDV) */}
-        <div className="flex bg-white rounded-2xl border border-gray-200 p-1.5 mb-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <button className="flex-1 bg-black text-white rounded-xl py-2.5 text-sm font-medium">Payer</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Portefeuille</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Histoire</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">RDV</button>
-        </div>
+        {/* Top Tabs */}
+        <TopNavTabs />
         
         {/* Progress bar */}
         <div className="flex space-x-1.5 mb-6 px-1">

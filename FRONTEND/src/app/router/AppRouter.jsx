@@ -25,6 +25,7 @@ import { AppointmentScheduledPage } from '../../features/payments/pages/Appointm
 import { PaymentDraftPage } from '../../features/payments/pages/PaymentDraftPage';
 import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecurityPage';
 import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
+import { WalletPage } from '../../features/learners/pages/WalletPage';
 
 export function AppRouter() {
   return (
@@ -110,6 +111,7 @@ export function AppRouter() {
                     <Route path="/paiements/attente" element={<PaymentPendingPage />} />
                     <Route path="/paiements/rendez-vous" element={<AppointmentScheduledPage />} />
                     <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
+                    <Route path="/portefeuille" element={<WalletPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

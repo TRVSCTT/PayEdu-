@@ -23,8 +23,12 @@ from app.schemas.payment import (
     PaiementFormulaire1,
     PaiementFormulaire2Confirmation,
     PaiementFormulaire3,
-    MoyenPaiement
+    MoyenPaiement,
+    PaiementRecapitulatif
 )
+from app.schemas.notification import NotificationCreate
+from app.models.notification import TypeNotification
+from app.services.notification_service import notification_service
 from app.services.cinetpay import CinetPayError, get_cinetpay_client
 from app.services.qrcode_services import generer_contenus_qrcodes
 
@@ -217,6 +221,12 @@ def traiter_webhook_cinetpay(db: Session, cpm_trans_id: str) -> Paiement:
         for type_code, contenu in contenus.items():
             db.add(PaiementQRCode(paiement_id=paiement.id, type_code=type_code, contenu=contenu))
         paiement.statut = StatutPaiement.EN_FILE_CAISSE
+        notification_service.creer_notification(db, NotificationCreate(
+            user_id=paiement.apprenant_id,
+            titre="Paiement validé par l'opérateur",
+            message=f"Votre paiement de {paiement.montant} FCFA est en attente de finalisation en caisse.",
+            type_notification=TypeNotification.PAIEMENT
+        ))
     elif statut_cinetpay == "REFUSED":
         paiement.statut = StatutPaiement.ECHOUEE
         paiement.motif_echec = "Paiement refusé par l'opérateur (CinetPay)"
@@ -261,6 +271,14 @@ def finaliser_caisse(db: Session, paiement_id: uuid.UUID) -> Paiement:
 
     paiement.statut = StatutPaiement.ACQUITTEE
     paiement.acquitte_at = datetime.utcnow()
+    
+    notification_service.creer_notification(db, NotificationCreate(
+        user_id=paiement.apprenant_id,
+        titre="Paiement finalisé",
+        message=f"Vos QR Codes pour {paiement.montant} FCFA ont été scannés avec succès.",
+        type_notification=TypeNotification.CONFIRMATION
+    ))
+
     db.commit()
     db.refresh(paiement)
     return paiement

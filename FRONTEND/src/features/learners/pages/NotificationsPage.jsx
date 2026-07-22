@@ -1,8 +1,44 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, CreditCard } from 'lucide-react';
+import { ChevronLeft, CreditCard, Bell, Info, AlertTriangle } from 'lucide-react';
+import { notificationService } from '../../../services/notificationService';
 
 export function NotificationsPage() {
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await notificationService.listerNotifications();
+        setNotifications(data || []);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des notifications", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const handleToutLu = async () => {
+    try {
+      await notificationService.marquerToutLu();
+      setNotifications(notifications.map(n => ({ ...n, est_lu: true })));
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des notifications", error);
+    }
+  };
+
+  const getIconForType = (type) => {
+    switch(type) {
+      case 'PAIEMENT': return <CreditCard className="w-5 h-5" />;
+      case 'ALERTE': return <AlertTriangle className="w-5 h-5" />;
+      case 'CONFIRMATION': return <Bell className="w-5 h-5" />;
+      default: return <Info className="w-5 h-5" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
@@ -17,7 +53,10 @@ export function NotificationsPage() {
           </button>
           <h1 className="text-xl font-semibold text-gray-900">Notifications</h1>
         </div>
-        <button className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors">
+        <button 
+          onClick={handleToutLu}
+          className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors"
+        >
           Tout lu
         </button>
       </header>
@@ -35,23 +74,35 @@ export function NotificationsPage() {
 
       {/* Notifications List */}
       <main className="flex-1 overflow-y-auto p-4 space-y-3">
-        {/* Item 1 */}
-        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-start space-x-4">
-          <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-            <CreditCard className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 mb-0.5">Paiement effectué</h3>
-            <p className="text-sm text-gray-600 mb-1.5 truncate">Paiement de 350 000 FCFA... (2frais)</p>
-            <div className="flex items-center text-xs text-gray-400 space-x-3">
-              <span>30 sept. 2026</span>
-              <span>20h40</span>
+        {isLoading ? (
+          <p className="text-center text-gray-500 py-4">Chargement...</p>
+        ) : notifications.length > 0 ? (
+          notifications.map((notif) => (
+            <div key={notif.id} className={`bg-white p-4 rounded-2xl border ${notif.est_lu ? 'border-gray-100' : 'border-gray-300'} shadow-sm flex items-start space-x-4 transition-colors`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${notif.est_lu ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}>
+                {getIconForType(notif.type_notification)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`text-base font-semibold mb-0.5 ${notif.est_lu ? 'text-gray-600' : 'text-gray-900'}`}>{notif.titre}</h3>
+                <p className="text-sm text-gray-600 mb-1.5">{notif.message}</p>
+                <div className="flex items-center text-xs text-gray-400 space-x-3">
+                  <span>{new Date(notif.created_at).toLocaleDateString('fr-FR')}</span>
+                  <span>{new Date(notif.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+              </div>
+              {!notif.est_lu && (
+                <div className="flex-shrink-0 pt-2">
+                  <span className="w-2.5 h-2.5 bg-black rounded-full block"></span>
+                </div>
+              )}
             </div>
+          ))
+        ) : (
+          <div className="text-center py-10">
+            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500">Aucune notification pour le moment.</p>
           </div>
-          <div className="flex-shrink-0 pt-2">
-            <span className="w-2.5 h-2.5 bg-black rounded-full block"></span>
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

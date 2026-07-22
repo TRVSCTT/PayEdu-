@@ -3,6 +3,7 @@ import { Outlet, NavLink, Link } from 'react-router-dom';
 import { Home, CreditCard, FileText, Settings, User, Bell } from 'lucide-react';
 import { useAuth } from '../../store/authStore';
 import { paymentService } from '../../services/paymentService';
+import { notificationService } from '../../services/notificationService';
 
 export function LearnerLayout() {
   const { user } = useAuth();
@@ -10,16 +11,20 @@ export function LearnerLayout() {
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   useEffect(() => {
-    const fetchProfil = async () => {
+    const fetchProfilAndNotifs = async () => {
       try {
-        const data = await paymentService.obtenirProfil();
-        setProfil(data);
+        const [profilData, count] = await Promise.all([
+          paymentService.obtenirProfil(),
+          notificationService.obtenirNombreNonLus()
+        ]);
+        setProfil(profilData);
+        setUnreadNotifications(count);
       } catch (error) {
-        console.error("Erreur lors de la récupération du profil", error);
+        console.error("Erreur lors de la récupération des données", error);
       }
     };
     if (user) {
-      fetchProfil();
+      fetchProfilAndNotifs();
     }
   }, [user]);
 

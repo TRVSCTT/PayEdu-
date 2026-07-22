@@ -1,26 +1,66 @@
+import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import { TopNavTabs } from '../../../components/ui/TopNavTabs';
-
-const MOCK_APPOINTMENTS = [
-  {
-    id: 1,
-    dateStr: '30 sept 2026 - 10H30',
-    location: 'Agence UBA, Douala -Ange Raphaël',
-    status: 'Planifié',
-    isFirst: true,
-    isLast: false,
-  },
-  {
-    id: 2,
-    dateStr: '30 sept 2026 - 10H30',
-    location: 'Agence UBA, Douala -Ange Raphaël',
-    status: 'Planifié',
-    isFirst: false,
-    isLast: true,
-  }
-];
+import { appointmentService } from '../../../services/appointmentService';
 
 export function AppointmentsPage() {
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const data = await appointmentService.getAppointments();
+        setAppointments(data || []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, []);
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthNames = ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${year} - ${hours}H${minutes}`;
+  };
+
+  // Ajoute isFirst et isLast pour la timeline
+  const formattedAppointments = appointments.map((apt, index) => ({
+    ...apt,
+    isFirst: index === 0,
+    isLast: index === appointments.length - 1
+  }));
+
+  // Mock data si vide pour montrer la maquette
+  const MOCK_APPOINTMENTS = [
+    {
+      id: 'mock-1',
+      dateStr: '30 sept 2026 - 10H30',
+      location: 'Agence UBA, Douala -Ange Raphaël',
+      status: 'Planifié',
+      isFirst: true,
+      isLast: false,
+    },
+    {
+      id: 'mock-2',
+      dateStr: '30 sept 2026 - 10H30',
+      location: 'Agence UBA, Douala -Ange Raphaël',
+      status: 'Planifié',
+      isFirst: false,
+      isLast: true,
+    }
+  ];
+
+  const displayAppointments = formattedAppointments.length > 0 ? formattedAppointments : MOCK_APPOINTMENTS;
+
   return (
     <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
       <div className="px-6 py-4 max-w-lg mx-auto">
@@ -29,7 +69,10 @@ export function AppointmentsPage() {
 
         <div className="mt-8 relative">
           
-          {MOCK_APPOINTMENTS.map((apt, index) => (
+          {isLoading ? (
+            <p className="text-center text-sm text-gray-500 py-4">Chargement de vos rendez-vous...</p>
+          ) : (
+            displayAppointments.map((apt) => (
             <div key={apt.id} className="flex relative mb-6 last:mb-0">
               
               {/* Timeline left side */}
@@ -49,10 +92,10 @@ export function AppointmentsPage() {
                 {/* Header: Date + Badge */}
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-[16px] font-medium text-gray-900 tracking-tight">
-                    {apt.dateStr}
+                    {apt.dateStr || (apt.date_rdv ? formatDateTime(apt.date_rdv) : 'Date non définie')}
                   </h3>
                   <span className="bg-black text-white text-[10px] font-medium px-2 py-0.5 rounded uppercase tracking-wider">
-                    {apt.status}
+                    {apt.statut || apt.status}
                   </span>
                 </div>
 
@@ -60,7 +103,7 @@ export function AppointmentsPage() {
                 <div className="flex items-start text-gray-600 mb-6">
                   <MapPin className="w-3.5 h-3.5 mr-1.5 mt-1 flex-shrink-0" />
                   <p className="text-[13px] leading-tight">
-                    {apt.location}
+                    {apt.lieu || apt.location}
                   </p>
                 </div>
 
@@ -83,7 +126,7 @@ export function AppointmentsPage() {
 
               </div>
             </div>
-          ))}
+          )))}
 
         </div>
 

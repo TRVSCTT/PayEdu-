@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from app.core.database import engine, Base
 from app.core.config import settings  # noqa: F401
-from app.router import payment, user, frais, notification, wallet
+from app.router import payment, user, frais, notification, wallet, appointment
 
 app = FastAPI(
     title="PayEdu",
@@ -31,6 +31,7 @@ app.include_router(user.router)
 app.include_router(frais.router)
 app.include_router(notification.router)
 app.include_router(wallet.router)
+app.include_router(appointment.router)
 
 @app.get('/')
 def root():

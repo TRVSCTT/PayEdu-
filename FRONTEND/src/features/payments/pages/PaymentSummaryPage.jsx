@@ -1,14 +1,35 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Delete } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function PaymentSummaryPage() {
   const navigate = useNavigate();
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [pinCode, setPinCode] = useState('');
 
-  const handlePay = () => {
-    toast.success('Paiement initié avec succès !');
-    // Redirection vers le tableau de bord ou vers une page de succès
-    navigate('/apprenant');
+  const handlePayClick = () => {
+    setShowSecurityModal(true);
+  };
+
+  const handleKeypadPress = (val) => {
+    if (val === 'delete') {
+      setPinCode(prev => prev.slice(0, -1));
+    } else {
+      if (pinCode.length < 6) {
+        const newPin = pinCode + val;
+        setPinCode(newPin);
+        
+        // Auto submit if 6 digits reached
+        if (newPin.length === 6) {
+          setTimeout(() => {
+            setShowSecurityModal(false);
+            toast.success('Paiement initié avec succès !');
+            navigate('/apprenant');
+          }, 500);
+        }
+      }
+    }
   };
 
   return (
@@ -98,13 +119,74 @@ export function PaymentSummaryPage() {
 
         {/* Bottom Section */}
         <button 
-          onClick={handlePay}
+          onClick={handlePayClick}
           className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
         >
           Payer 350 000 FCFA
         </button>
 
       </div>
+
+      {/* Security Modal Overlay */}
+      {showSecurityModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] shadow-2xl p-8 w-full max-w-sm border border-gray-100 animate-in fade-in zoom-in duration-200">
+            
+            <h3 className="text-2xl font-medium text-center text-gray-900 mb-8">Sécurité</h3>
+            
+            {/* PIN Inputs */}
+            <div className="flex justify-center space-x-2 mb-10">
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <div 
+                  key={index} 
+                  className={`w-10 h-10 sm:w-12 sm:h-12 border ${pinCode.length > index ? 'border-black bg-black' : 'border-gray-400 bg-white'} rounded-xl flex items-center justify-center transition-all`}
+                >
+                  {/* Optionnel: masquer le point avec un delay ou juste afficher rempli */}
+                </div>
+              ))}
+            </div>
+
+            {/* Keypad */}
+            <div className="grid grid-cols-3 gap-y-6 gap-x-4 max-w-[240px] mx-auto">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handleKeypadPress(num.toString())}
+                  className="w-14 h-14 rounded-full border border-gray-900 flex items-center justify-center text-2xl font-medium text-gray-900 mx-auto hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                >
+                  {num}
+                </button>
+              ))}
+              <div className="col-start-2">
+                <button
+                  onClick={() => handleKeypadPress('0')}
+                  className="w-14 h-14 rounded-full border border-gray-900 flex items-center justify-center text-2xl font-medium text-gray-900 mx-auto hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                >
+                  0
+                </button>
+              </div>
+              <div className="flex items-center justify-center">
+                <button
+                  onClick={() => handleKeypadPress('delete')}
+                  className="w-14 h-14 rounded-lg flex items-center justify-center text-gray-900 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+                >
+                  <Delete className="w-8 h-8 fill-black text-white" strokeWidth={1} />
+                </button>
+              </div>
+            </div>
+            
+            {/* Close button (optional, for UX to cancel) */}
+            <div className="mt-8 text-center">
+              <button 
+                onClick={() => setShowSecurityModal(false)}
+                className="text-sm text-gray-500 hover:text-gray-900"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

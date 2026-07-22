@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Upload, CheckCircle2 } from 'lucide-react';
-import { TopNavTabs } from '../../../components/ui/TopNavTabs';
+import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, CheckCircle2, Upload } from 'lucide-react'
+import { TopNavTabs } from '../../../components/ui/TopNavTabs'
+import { Stepper, PageHeader, cardStyles, buttonStyles, StatusBadge } from '../../../components/ui/designSystem'
 
 const RECEIPTS = [
   { id: 'is', title: 'Inscription spéciale' },
@@ -9,125 +10,132 @@ const RECEIPTS = [
   { id: 't2', title: 'Tranche 2' },
   { id: 'vm', title: 'Visite médicale' },
   { id: 'ce', title: 'Carte étudiant' },
-];
+]
+
+const STEPS = [
+  { label: 'Université' },
+  { label: 'Bénéficiaire' },
+  { label: 'Type de frais' },
+  { label: 'Moyen de paiement' },
+  { label: 'Vérification' },
+  { label: 'Confirmation' },
+]
 
 export function UploadReceiptPage() {
-  const navigate = useNavigate();
-  const [selectedReceipts, setSelectedReceipts] = useState([]);
-  const [uploadedFiles, setUploadedFiles] = useState({});
-  const fileInputRef = useRef(null);
-  const [currentUploadId, setCurrentUploadId] = useState(null);
+  const navigate = useNavigate()
+  const [selectedReceipts, setSelectedReceipts] = useState([])
+  const [uploadedFiles, setUploadedFiles] = useState({})
+  const fileInputRef = useRef(null)
+  const [currentUploadId, setCurrentUploadId] = useState(null)
 
   const toggleReceipt = (id) => {
-    setSelectedReceipts(prev => 
-      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-    );
-  };
+    setSelectedReceipts((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]))
+  }
 
   const triggerUpload = (e, id) => {
-    e.stopPropagation(); // Prevent toggling the checkbox
-    setCurrentUploadId(id);
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+    e.stopPropagation()
+    setCurrentUploadId(id)
+    fileInputRef.current?.click()
+  }
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files[0]
     if (file && currentUploadId) {
-      setUploadedFiles(prev => ({
+      setUploadedFiles((prev) => ({
         ...prev,
-        [currentUploadId]: file.name
-      }));
-      // Automatically select the receipt if a file is uploaded
+        [currentUploadId]: file.name,
+      }))
+
       if (!selectedReceipts.includes(currentUploadId)) {
-        setSelectedReceipts(prev => [...prev, currentUploadId]);
+        setSelectedReceipts((prev) => [...prev, currentUploadId])
       }
     }
-    // Reset input value to allow uploading the same file again if needed
-    e.target.value = '';
-    setCurrentUploadId(null);
-  };
+
+    e.target.value = ''
+    setCurrentUploadId(null)
+  }
 
   const handleContinue = () => {
-    navigate('/apprenant/paiements/methode');
-  };
+    navigate('/apprenant/paiements/methode')
+  }
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
-      <div className="px-6 py-4 max-w-lg mx-auto">
-        
-        {/* Top Tabs */}
-        <TopNavTabs />
-        
-        {/* Progress bar - Step 2 */}
-        <div className="flex space-x-1.5 mb-6 px-1">
-          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
-          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
-          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
-          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
-        </div>
+    <div className="space-y-6">
+      <TopNavTabs />
 
-        {/* Back and Title */}
-        <div className="flex items-center space-x-4 mb-6">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center bg-white hover:bg-gray-50 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-black" />
-          </button>
-          <h2 className="text-[17px] font-medium text-gray-900">Joindre les quitus correspondant</h2>
-        </div>
+      <Stepper steps={STEPS} currentStep={4} />
 
-        {/* Hidden file input */}
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          style={{ display: 'none' }} 
-          onChange={handleFileChange} 
-          accept=".pdf,.png,.jpg,.jpeg"
-        />
-
-        {/* Receipts List */}
-        <div className="space-y-3">
-          {RECEIPTS.map(receipt => (
-            <div 
-              key={receipt.id} 
-              onClick={() => toggleReceipt(receipt.id)}
-              className={`bg-white p-4 rounded-2xl border ${uploadedFiles[receipt.id] ? 'border-green-500' : 'border-gray-200'} shadow-sm flex items-center cursor-pointer hover:border-gray-300 transition-colors`}
-            >
-              <div className="mr-4 flex-shrink-0">
-                <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${selectedReceipts.includes(receipt.id) ? 'bg-black border-black' : 'border-gray-400 bg-white'}`}>
-                  {selectedReceipts.includes(receipt.id) && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                </div>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <h3 className="text-[17px] font-medium text-gray-900 leading-tight truncate">{receipt.title}</h3>
-                {uploadedFiles[receipt.id] && (
-                  <p className="text-xs text-green-600 mt-1 truncate">{uploadedFiles[receipt.id]}</p>
-                )}
-              </div>
-              <div 
-                className="text-right flex-shrink-0 pl-2 cursor-pointer z-10"
-                onClick={(e) => triggerUpload(e, receipt.id)}
-              >
-                {uploadedFiles[receipt.id] ? (
-                  <CheckCircle2 className="w-6 h-6 text-green-500" strokeWidth={2} />
-                ) : (
-                  <Upload className="w-6 h-6 text-gray-800 hover:text-black transition-colors" strokeWidth={1.5} />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom Section */}
-        <div className="mt-8 mb-5">
-          <button 
-            onClick={handleContinue}
-            className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
-          >
-            Continuer
-          </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-text transition hover:bg-primary-light"
+          aria-label="Retour"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Étape 5</p>
+          <h2 className="text-xl font-semibold text-text">Joindre les quitus correspondants</h2>
         </div>
       </div>
+
+      <PageHeader description="Ajoutez les justificatifs requis pour garder le dossier clair avant la validation finale." />
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={handleFileChange}
+        accept=".pdf,.png,.jpg,.jpeg"
+      />
+
+      <section className="space-y-3">
+        {RECEIPTS.map((receipt) => {
+          const hasFile = Boolean(uploadedFiles[receipt.id])
+          const isSelected = selectedReceipts.includes(receipt.id)
+
+          return (
+            <button
+              key={receipt.id}
+              type="button"
+              onClick={() => toggleReceipt(receipt.id)}
+              className={cardStyles(`flex w-full items-center gap-4 p-4 text-left transition ${hasFile ? 'border-success/30 bg-success-light/50' : ''}`)}
+            >
+              <span
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 ${
+                  isSelected ? 'border-primary bg-primary text-white' : 'border-border bg-white'
+                }`}
+              >
+                {isSelected ? '✓' : null}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-text">{receipt.title}</h3>
+                {uploadedFiles[receipt.id] ? <p className="mt-1 truncate text-xs text-success">{uploadedFiles[receipt.id]}</p> : <p className="mt-1 text-xs text-text-muted">Aucun fichier sélectionné</p>}
+              </div>
+              <div
+                className="flex shrink-0 items-center justify-center"
+                onClick={(e) => triggerUpload(e, receipt.id)}
+                role="button"
+                tabIndex={0}
+              >
+                {hasFile ? (
+                  <StatusBadge status="confirmed" label="Ajouté" tone="success" />
+                ) : (
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-text transition hover:bg-primary-light">
+                    <Upload className="h-5 w-5" />
+                  </span>
+                )}
+              </div>
+            </button>
+          )
+        })}
+      </section>
+
+      <div className="pt-2">
+        <button onClick={handleContinue} className={buttonStyles({ variant: 'primary', size: 'lg', block: true })}>
+          Continuer
+        </button>
+      </div>
     </div>
-  );
+  )
 }

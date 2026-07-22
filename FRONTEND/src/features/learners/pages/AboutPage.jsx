@@ -1,80 +1,58 @@
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Info, Shield, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, Heart, Info, ShieldCheck } from 'lucide-react'
+import { cardStyles, PageHeader } from '../../../components/ui/designSystem'
 
 export function AboutPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-80px)] pb-24 font-sans text-gray-900">
-      <div className="px-5 py-6 max-w-lg mx-auto">
-        
-        {/* Header */}
-        <div className="flex items-center mb-8">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="w-10 h-10 rounded-full border border-gray-900 flex items-center justify-center bg-white hover:bg-gray-50 transition-colors mr-4"
-          >
-            <ChevronLeft className="w-6 h-6 text-black" strokeWidth={1.5} />
-          </button>
-          <h1 className="text-xl font-medium">À propos</h1>
-        </div>
+    <div className="space-y-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-text-secondary transition hover:bg-primary-light hover:text-text"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Retour
+      </button>
 
-        {/* Logo and Version */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="w-24 h-24 bg-black rounded-3xl flex items-center justify-center shadow-lg mb-4">
-            <span className="text-white text-3xl font-bold tracking-tighter">PE</span>
+      <PageHeader eyebrow="À propos" title="À propos de l'application" description="Un produit pensé pour simplifier les paiements universitaires avec une interface crédible et rassurante." />
+
+      <section className={cardStyles('p-6 sm:p-8')}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary text-white shadow-elevated">
+            <span className="text-3xl font-bold tracking-tighter">PE</span>
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900">PayEdu</h2>
-          <p className="text-sm text-gray-500 mt-1">Version 1.0.0</p>
-        </div>
-
-        {/* Description Card */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm mb-6">
-          <h3 className="text-[17px] font-medium text-gray-900 mb-3">Notre Mission</h3>
-          <p className="text-[14px] text-gray-600 leading-relaxed mb-6">
-            PayEdu a pour vocation de simplifier la vie des étudiants et des établissements scolaires en digitalisant le processus de paiement des frais de scolarité, d'inscription et autres services.
-          </p>
-          
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <Shield className="w-4 h-4 text-black" />
-              </div>
-              <div>
-                <h4 className="text-[14px] font-medium text-gray-900">Paiement Sécurisé</h4>
-                <p className="text-[12px] text-gray-500 mt-0.5">Vos transactions sont chiffrées de bout en bout.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <Info className="w-4 h-4 text-black" />
-              </div>
-              <div>
-                <h4 className="text-[14px] font-medium text-gray-900">Suivi en temps réel</h4>
-                <p className="text-[12px] text-gray-500 mt-0.5">Gardez un œil sur l'état de tous vos reçus et factures.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <Heart className="w-4 h-4 text-black" />
-              </div>
-              <div>
-                <h4 className="text-[14px] font-medium text-gray-900">Pensé pour vous</h4>
-                <p className="text-[12px] text-gray-500 mt-0.5">Une interface fluide, dynamique et premium.</p>
-              </div>
-            </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-text">PayEdu</h2>
+            <p className="mt-1 text-sm text-text-muted">Version 1.0.0</p>
           </div>
         </div>
 
-        {/* Footer info */}
-        <div className="text-center text-[12px] text-gray-400">
-          <p>© 2026 PayEdu. Tous droits réservés.</p>
-          <p className="mt-1">Fait avec passion au Cameroun.</p>
+        <div className="mt-8 space-y-4">
+          <AboutRow icon={ShieldCheck} title="Paiement sécurisé" description="Vos transactions restent protégées et clairement présentées." />
+          <AboutRow icon={Info} title="Suivi en temps réel" description="Les statuts de paiement, reçus et informations utiles restent visibles." />
+          <AboutRow icon={Heart} title="Pensé pour vous" description="Une interface fluide, sobre et adaptée aux usages mobiles." />
         </div>
+      </section>
 
+      <div className="text-center text-xs text-text-muted">
+        <p>© 2026 PayEdu. Tous droits réservés.</p>
+        <p className="mt-1">Conçu pour le Cameroun et l’écosystème académique.</p>
       </div>
     </div>
-  );
+  )
+}
+
+function AboutRow({ icon: Icon, title, description }) {
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-border bg-background p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-light text-primary">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-text">{title}</h3>
+        <p className="mt-1 text-sm leading-6 text-text-secondary">{description}</p>
+      </div>
+    </div>
+  )
 }

@@ -1,96 +1,106 @@
-import { useState, useEffect } from 'react';
-import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
-import { Home, CreditCard, FileText, Settings, User, Bell } from 'lucide-react';
-import { useAuth } from '../../store/authStore';
-import { paymentService } from '../../services/paymentService';
-import { notificationService } from '../../services/notificationService';
+import { useEffect, useState } from 'react'
+import { Outlet, NavLink, Link, useLocation } from 'react-router-dom'
+import { Bell, CreditCard, FileText, Home, Settings, User } from 'lucide-react'
+import { useAuth } from '../../store/authStore'
+import { paymentService } from '../../services/paymentService'
+import { notificationService } from '../../services/notificationService'
+import { cx } from '../ui/designSystem'
 
 export function LearnerLayout() {
-  const { user } = useAuth();
-  const [profil, setProfil] = useState(null);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const { user } = useAuth()
+  const [profil, setProfil] = useState(null)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
 
   useEffect(() => {
     const fetchProfilAndNotifs = async () => {
       try {
         const [profilData, count] = await Promise.all([
           paymentService.obtenirProfil(),
-          notificationService.obtenirNombreNonLus()
-        ]);
-        setProfil(profilData);
-        setUnreadNotifications(count);
+          notificationService.obtenirNombreNonLus(),
+        ])
+        setProfil(profilData)
+        setUnreadNotifications(count)
       } catch (error) {
-        console.error("Erreur lors de la récupération des données", error);
+        console.error('Erreur lors de la récupération des données', error)
       }
-    };
-    if (user) {
-      fetchProfilAndNotifs();
     }
-  }, [user]);
 
-  const location = useLocation();
-  const isProfilePage = location.pathname === '/apprenant/profil';
+    if (user) {
+      fetchProfilAndNotifs()
+    }
+  }, [user])
+
+  const location = useLocation()
+  const isProfilePage = location.pathname === '/apprenant/profil'
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans">
-      {/* Top Header */}
+    <div className="app-page flex flex-col">
       {!isProfilePage && (
-        <header className="bg-[#fafafa] px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-            {/* Generate avatar using UI Faces or an initial-based avatar */}
-            <img 
-              src={`https://ui-avatars.com/api/?name=${profil?.prenom || 'User'}+${profil?.nom || ''}&background=000&color=fff&size=150`} 
-              alt="Avatar" 
-              className="w-full h-full object-cover" 
-            />
+        <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 overflow-hidden rounded-2xl border border-border bg-primary-light">
+                <img
+                  src={`https://ui-avatars.com/api/?name=${profil?.prenom || 'User'}+${profil?.nom || ''}&background=123B5D&color=fff&size=150`}
+                  alt="Avatar"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">Bonjour</p>
+                <h1 className="text-lg font-semibold leading-tight text-text">
+                  {profil?.prenom ? `${profil.prenom} ${profil.nom}` : user?.prenom || 'Étudiant'}
+                </h1>
+                <p className="text-sm text-text-secondary">{profil?.etablissement_nom || 'Chargement…'}</p>
+              </div>
+            </div>
+
+            <Link
+              to="/apprenant/notifications"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-text transition hover:bg-primary-light"
+            >
+              <Bell className="h-5 w-5" aria-hidden="true" />
+              {unreadNotifications > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full border border-white bg-danger px-1 text-[10px] font-bold text-white">
+                  {unreadNotifications}
+                </span>
+              )}
+            </Link>
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900 leading-tight">
-              Bonjour {profil?.prenom ? `${profil.prenom} ${profil.nom}` : (user?.prenom || 'Jack')}
-            </h1>
-            <p className="text-sm text-gray-500">{profil?.etablissement_nom || "Chargement..."}</p>
-          </div>
-        </div>
-        <Link to="/apprenant/notifications" className="relative p-2">
-          <Bell className="w-6 h-6 text-gray-800" />
-          {unreadNotifications > 0 && (
-            <span className="absolute top-1 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white border border-white">
-              {unreadNotifications}
-            </span>
-          )}
-        </Link>
-      </header>
+        </header>
       )}
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main className={cx('flex-1 pb-24', !isProfilePage && 'pt-4')}>
         <Outlet />
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-between items-center px-6 py-3 pb-safe z-50 rounded-t-2xl shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
-        <NavItem to="/apprenant" icon={<Home />} label="Accueil" />
-        <NavItem to="/apprenant/paiements" icon={<CreditCard />} label="Paiement" />
-        <NavItem to="/apprenant/documents" icon={<FileText />} label="Document" />
-        <NavItem to="/apprenant/parametres" icon={<Settings />} label="Paramètre" />
-        <NavItem to="/apprenant/profil" icon={<User />} label="Profil" />
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white/95 backdrop-blur">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-5 gap-1 px-2 py-2 pb-safe">
+          <NavItem to="/apprenant" icon={Home} label="Accueil" end />
+          <NavItem to="/apprenant/paiements" icon={CreditCard} label="Paiement" />
+          <NavItem to="/apprenant/documents" icon={FileText} label="Documents" />
+          <NavItem to="/apprenant/parametres" icon={Settings} label="Réglages" />
+          <NavItem to="/apprenant/profil" icon={User} label="Profil" />
+        </div>
       </nav>
     </div>
-  );
+  )
 }
 
-function NavItem({ to, icon, label }) {
+function NavItem({ to, icon: Icon, label, end = false }) {
   return (
     <NavLink
       to={to}
-      end={to === "/apprenant"}
+      end={end}
       className={({ isActive }) =>
-        `flex flex-col items-center space-y-1 ${isActive ? 'text-black' : 'text-gray-400'}`
+        cx(
+          'flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-xs font-semibold transition-colors',
+          isActive ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:bg-gray-100 hover:text-text',
+        )
       }
     >
-      <div className="w-6 h-6">{icon}</div>
-      <span className="text-[10px] font-medium">{label}</span>
+      <Icon className="h-5 w-5" aria-hidden="true" />
+      <span>{label}</span>
     </NavLink>
-  );
+  )
 }

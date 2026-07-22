@@ -1,48 +1,41 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { CalendarRange, CreditCard, History, Wallet } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { buttonStyles, cx } from './designSystem'
+
+const TABS = [
+  { label: 'Payer', to: '/apprenant/paiements/nouveau', match: '/paiements', icon: CreditCard },
+  { label: 'Portefeuille', to: '/apprenant/portefeuille', match: '/portefeuille', icon: Wallet },
+  { label: 'Historique', to: '/apprenant/histoire', match: '/histoire', icon: History },
+  { label: 'RDV', to: '/apprenant/rdv', match: '/rdv', icon: CalendarRange },
+]
 
 export function TopNavTabs() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // On détermine quel onglet est actif en fonction du path
-  // Payer (par défaut /apprenant/paiements/...)
-  // Portefeuille (/apprenant/portefeuille)
-  // Histoire (/apprenant/histoire)
-  // RDV (/apprenant/rdv)
-  
-  const currentPath = location.pathname;
-  
-  const isPayerActive = currentPath.includes('/paiements/');
-  const isPortefeuilleActive = currentPath.includes('/portefeuille');
-  const isHistoireActive = currentPath.includes('/histoire');
-  const isRdvActive = currentPath.includes('/rdv');
+  const navigate = useNavigate()
+  const location = useLocation()
+  const currentPath = location.pathname
 
   return (
-    <div className="flex bg-white rounded-2xl border border-gray-200 p-1.5 mb-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-      <button 
-        onClick={() => navigate('/apprenant/paiements/nouveau')}
-        className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors ${isPayerActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-      >
-        Payer
-      </button>
-      <button 
-        onClick={() => navigate('/apprenant/portefeuille')}
-        className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors ${isPortefeuilleActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-      >
-        Portefeuille
-      </button>
-      <button 
-        onClick={() => navigate('/apprenant/histoire')}
-        className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors ${isHistoireActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-      >
-        Histoire
-      </button>
-      <button 
-        onClick={() => navigate('/apprenant/rdv')}
-        className={`flex-1 rounded-xl py-2.5 text-sm font-medium transition-colors ${isRdvActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-50'}`}
-      >
-        RDV
-      </button>
+    <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-2 shadow-soft sm:grid-cols-4">
+      {TABS.map((tab) => {
+        const active = currentPath.includes(tab.match)
+        const Icon = tab.icon
+
+        return (
+          <button
+            key={tab.to}
+            type="button"
+            onClick={() => navigate(tab.to)}
+            className={cx(
+              buttonStyles({ variant: active ? 'primary' : 'ghost', size: 'sm', block: true }),
+              'justify-center',
+              !active && 'text-text-secondary',
+            )}
+          >
+            <Icon className="h-4 w-4" aria-hidden="true" />
+            {tab.label}
+          </button>
+        )
+      })}
     </div>
-  );
+  )
 }

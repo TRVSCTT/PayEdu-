@@ -1,39 +1,58 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, FileCheck2, RefreshCcw, LifeBuoy, ReceiptText } from 'lucide-react'
+import { usePaymentContext } from '../context/PaymentContext'
+import { cardStyles, buttonStyles, StatusBadge, PageHeader } from '../../../components/ui/designSystem'
+import { maskReference } from '../../../utils/formatters'
 
 export function PaymentSuccessPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const { paymentData } = usePaymentContext()
+
+  const reference = paymentData?.paiement_id ? maskReference(paymentData.paiement_id) : 'Référence en cours'
 
   return (
-    <div className="bg-white min-h-screen flex flex-col items-center justify-between p-6 font-sans">
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto">
-        <div className="mb-8">
-          {/* Custom checkmark circle SVG matching the mockup */}
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="#222" strokeWidth="6" fill="white" />
-            <path d="M28 50 L44 66 L78 26" stroke="#222" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-            {/* Adding the small trailing tail of the checkmark from the mockup */}
-            <path d="M78 26 Q 85 24 92 34" stroke="#222" strokeWidth="6" strokeLinecap="round" fill="none" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-medium text-black mb-6 text-center tracking-wide">Paiement confirmé</h1>
-        <p className="text-center text-gray-800 text-[15px] leading-relaxed max-w-[280px]">
-          Votre transaction a été accepté. Un reçus ainsi qu'un rendez vous vous seront communiqués
-        </p>
-      </div>
+    <div className="flex min-h-[70vh] items-center justify-center py-6">
+      <div className="w-full max-w-2xl space-y-6">
+        <PageHeader
+          eyebrow="Confirmation"
+          title="Paiement confirmé"
+          description="Votre transaction a été acceptée. Le reçu et le détail de l’opération restent accessibles."
+        />
 
-      <div className="w-full max-w-sm mx-auto pb-6">
-        <div className="flex justify-center items-center space-x-2 mb-10">
-          <div className="w-2.5 h-2.5 rounded-full bg-black"></div>
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-gray-400 bg-white"></div>
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-gray-400 bg-white"></div>
-        </div>
-        <button 
-          onClick={() => navigate('/apprenant/paiements/attente')}
-          className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
-        >
-          Continuer
-        </button>
+        <section className={cardStyles('overflow-hidden')}>
+          <div className="flex flex-col items-center gap-6 px-6 py-10 text-center sm:px-10">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-success-light text-success">
+              <FileCheck2 className="h-12 w-12" />
+            </div>
+            <div className="space-y-3">
+              <StatusBadge status="confirmed" tone="success" />
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-text-muted">Référence</p>
+              <p className="text-2xl font-semibold tracking-tight text-text">{reference}</p>
+              <p className="max-w-xl text-sm leading-6 text-text-secondary">
+                La prochaine étape consiste à conserver le reçu ou à consulter le détail complet de la transaction.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-border bg-background p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
+            <Link to="/apprenant/recu" className={buttonStyles({ variant: 'primary', block: true })}>
+              Télécharger le reçu
+              <ReceiptText className="h-4 w-4" />
+            </Link>
+            <button onClick={() => navigate('/apprenant/paiements/recapitulatif')} className={buttonStyles({ variant: 'secondary', block: true })}>
+              Voir le détail
+            </button>
+            <button onClick={() => navigate('/apprenant/paiements/nouveau')} className={buttonStyles({ variant: 'secondary', block: true })}>
+              <RefreshCcw className="h-4 w-4" />
+              Nouveau paiement
+            </button>
+            <Link to="/apprenant/parametres/support" className={buttonStyles({ variant: 'secondary', block: true })}>
+              <LifeBuoy className="h-4 w-4" />
+              Assistance
+            </Link>
+          </div>
+        </section>
       </div>
     </div>
-  );
+  )
 }

@@ -24,3 +24,8 @@ export async function registerLearner(learnerData) {
   const response = await apiClient.post(API_ROUTES.AUTH.REGISTER_LEARNER, learnerData);
   return response.data;
 }
+
+export async function registerCaisse(caisseData) {
+  const response = await apiClient.post(API_ROUTES.AUTH.REGISTER_CAISSE, caisseData);
+  return response.data;
+}

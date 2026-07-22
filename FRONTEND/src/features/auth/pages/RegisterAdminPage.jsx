@@ -1,101 +1,120 @@
-/**
- * RegisterAdminPage.jsx
- * Rôle : Page publique d'inscription pour un nouvel administrateur.
- */
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'sonner';
-import { adminSchema } from '../schemas/adminSchema';
-import { useRegisterAdmin } from '../hooks/useRegisterAdmin';
-import { handleApiError } from '../../../utils/handleApiError';
-import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { Loader2, ShieldCheck, UserPlus } from 'lucide-react'
+import { adminSchema } from '../schemas/adminSchema'
+import { useRegisterAdmin } from '../hooks/useRegisterAdmin'
+import { handleApiError } from '../../../utils/handleApiError'
+import { buttonStyles, PageHeader, StatusBadge } from '../../../components/ui/designSystem'
 
 export function RegisterAdminPage() {
-  const navigate = useNavigate();
-  const { mutateAsync: performRegister, isPending } = useRegisterAdmin();
+  const navigate = useNavigate()
+  const { mutateAsync: performRegister, isPending } = useRegisterAdmin()
 
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
-    resolver: zodResolver(adminSchema)
-  });
+    resolver: zodResolver(adminSchema),
+  })
 
   const onSubmit = async (data) => {
     try {
-      await performRegister(data);
-      toast.success("Compte administrateur créé avec succès !");
-      navigate('/connexion');
+      await performRegister(data)
+      toast.success('Compte administrateur créé avec succès !')
+      navigate('/connexion')
     } catch (error) {
-      const apiError = handleApiError(error);
-      toast.error(apiError.message);
+      const apiError = handleApiError(error)
+      toast.error(apiError.message)
     }
-  };
+  }
 
   return (
-    <div>
-      <h3 className="text-xl font-bold text-gray-900 text-center mb-6">Créer un compte Adminstateur</h3>
-      
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nom</label>
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <StatusBadge status="confirmed" label="Création administrateur" tone="primary" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            Portail sécurisé
+          </span>
+        </div>
+
+        <PageHeader
+          title="Créer un compte administrateur"
+          description="Cet accès permet d’administrer les établissements, les bénéficiaires et les paramètres globaux."
+        />
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="app-label" htmlFor="nom">
+              Nom
+            </label>
             <input
+              id="nom"
               type="text"
               {...register('nom')}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.nom ? 'border-danger-DEFAULT' : 'border-gray-border'} rounded-md shadow-sm sm:text-sm`}
+              className={`app-input ${errors.nom ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}`}
             />
-            {errors.nom && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.nom.message}</p>}
+            {errors.nom ? <p className="app-error">{errors.nom.message}</p> : null}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Prénom</label>
+          <div className="space-y-2">
+            <label className="app-label" htmlFor="prenom">
+              Prénom
+            </label>
             <input
+              id="prenom"
               type="text"
               {...register('prenom')}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.prenom ? 'border-danger-DEFAULT' : 'border-gray-border'} rounded-md shadow-sm sm:text-sm`}
+              className={`app-input ${errors.prenom ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}`}
             />
-            {errors.prenom && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.prenom.message}</p>}
+            {errors.prenom ? <p className="app-error">{errors.prenom.message}</p> : null}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">E-mail</label>
+        <div className="space-y-2">
+          <label className="app-label" htmlFor="email">
+            E-mail
+          </label>
           <input
+            id="email"
             type="email"
+            autoComplete="email"
             {...register('email')}
-            className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-danger-DEFAULT' : 'border-gray-border'} rounded-md shadow-sm sm:text-sm`}
+            className={`app-input ${errors.email ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}`}
           />
-          {errors.email && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.email.message}</p>}
+          {errors.email ? <p className="app-error">{errors.email.message}</p> : null}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+        <div className="space-y-2">
+          <label className="app-label" htmlFor="mot_de_passe">
+            Mot de passe
+          </label>
           <input
+            id="mot_de_passe"
             type="password"
+            autoComplete="new-password"
             {...register('mot_de_passe')}
-            className={`mt-1 block w-full px-3 py-2 border ${errors.mot_de_passe ? 'border-danger-DEFAULT' : 'border-gray-border'} rounded-md shadow-sm sm:text-sm`}
+            className={`app-input ${errors.mot_de_passe ? 'border-danger focus:border-danger focus:ring-danger/20' : ''}`}
           />
-          {errors.mot_de_passe && <p className="mt-1 text-sm text-danger-DEFAULT">{errors.mot_de_passe.message}</p>}
+          {errors.mot_de_passe ? <p className="app-error">{errors.mot_de_passe.message}</p> : null}
         </div>
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-DEFAULT hover:bg-primary-dark disabled:opacity-50"
-        >
-          {isPending ? (
-            <><Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> Inscription...</>
-          ) : (
-            "Créer le compte"
-          )}
-        </button>
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-between">
+          <Link to="/connexion" className={buttonStyles({ variant: 'secondary', size: 'lg', block: true })}>
+            Annuler
+          </Link>
+          <button type="submit" disabled={isPending} className={buttonStyles({ variant: 'primary', size: 'lg', block: true })}>
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+            Créer le compte
+          </button>
+        </div>
       </form>
-      <p className="mt-4 text-center text-sm">
-        Déjà un compte ? <Link to="/connexion" className="text-primary-DEFAULT hover:underline">Se connecter</Link>
-      </p>
     </div>
-  );
+  )
 }

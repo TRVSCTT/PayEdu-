@@ -1,142 +1,116 @@
-import { useState, useEffect } from 'react';
-import { FileText, MoreVertical, Plus } from 'lucide-react';
-import { paymentService } from '../../../services/paymentService';
-import { fraisService } from '../../../services/fraisService';
+import { useEffect, useState } from 'react'
+import { FileText, FolderOpen, MoreVertical, Plus } from 'lucide-react'
+import { paymentService } from '../../../services/paymentService'
+import { fraisService } from '../../../services/fraisService'
+import { cardStyles, EmptyState, PageHeader, StatusBadge } from '../../../components/ui/designSystem'
+import { formatDate, formatMoney } from '../../../utils/formatters'
 
 export function DocumentsPage() {
-  const [activeTab, setActiveTab] = useState('Tout');
-  const [documents, setDocuments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const tabs = ['Tout', 'Facture', 'Reçus', 'Importé', 'Quitus'];
+  const [activeTab, setActiveTab] = useState('Tout')
+  const [documents, setDocuments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const tabs = ['Tout', 'Facture', 'Reçus', 'Importé', 'Quitus']
 
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const [histData, fraisData] = await Promise.all([
-          paymentService.obtenirHistorique(),
-          fraisService.listerFrais()
-        ]);
-        
-        const paiementsAcquittes = (histData || []).filter(p => p.statut === 'acquittee');
-        
-        // Les reçus (paiements acquittés)
-        const recus = paiementsAcquittes.map(p => {
-          const date = new Date(p.created_at);
-          const dateStr = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + 
-                          date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h');
+        const [histData, fraisData] = await Promise.all([paymentService.obtenirHistorique(), fraisService.listerFrais()])
+        const paiementsAcquittes = (histData || []).filter((p) => p.statut === 'acquittee')
 
-          return {
-            id: `recu-${p.id}`,
-            title: 'Paiement effectué',
-            description: `Paiement de ${p.montant ? p.montant.toLocaleString('fr-FR') : '0'} FCFA (${p.objet_paiement})`,
-            dateStr: dateStr,
-            type: 'Reçus'
-          };
-        });
+        const recus = paiementsAcquittes.map((p) => ({
+          id: `recu-${p.id}`,
+          title: 'Paiement effectué',
+          description: `Paiement de ${formatMoney(p.montant)} (${p.objet_paiement})`,
+          dateStr: formatDate(p.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          type: 'Reçus',
+        }))
 
-        // Les factures (frais non payés)
-        const unpaidFrais = (fraisData || []).filter(f => !paiementsAcquittes.some(p => p.objet_paiement.includes(f.titre)));
-        const factures = unpaidFrais.map(f => {
-          return {
-            id: `facture-${f.id}`,
-            title: `Facture : ${f.titre}`,
-            description: `Montant : ${f.montant ? f.montant.toLocaleString('fr-FR') : '0'} FCFA`,
-            dateStr: `Échéance : ${new Date(f.date_echeance).toLocaleDateString('fr-FR')}`,
-            type: 'Facture'
-          };
-        });
+        const unpaidFrais = (fraisData || []).filter((f) => !paiementsAcquittes.some((p) => p.objet_paiement.includes(f.titre)))
+        const factures = unpaidFrais.map((f) => ({
+          id: `facture-${f.id}`,
+          title: `Facture : ${f.titre}`,
+          description: `Montant : ${formatMoney(f.montant)}`,
+          dateStr: `Échéance : ${formatDate(f.date_echeance, { dateStyle: 'medium' })}`,
+          type: 'Facture',
+        }))
 
-        // Historique récent non abouti (brouillon, attente caisse)
-        const pending = (histData || []).filter(p => p.statut !== 'acquittee').map(p => {
-          return {
+        const pending = (histData || [])
+          .filter((p) => p.statut !== 'acquittee')
+          .map((p) => ({
             id: `pending-${p.id}`,
             title: 'Paiement en cours',
-            description: `Tentative de ${p.montant ? p.montant.toLocaleString('fr-FR') : '0'} FCFA (${p.objet_paiement})`,
-            dateStr: new Date(p.created_at).toLocaleDateString('fr-FR'),
-            type: 'Facture'
-          };
-        });
+            description: `Tentative de ${formatMoney(p.montant)} (${p.objet_paiement})`,
+            dateStr: formatDate(p.created_at, { dateStyle: 'medium' }),
+            type: 'Facture',
+          }))
 
-        setDocuments([...recus, ...factures, ...pending]);
+        setDocuments([...recus, ...factures, ...pending])
       } catch (error) {
-        console.error("Erreur de récupération des documents", error);
+        console.error('Erreur de récupération des documents', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    fetchDocuments();
-  }, []);
+    }
+    fetchDocuments()
+  }, [])
 
-  const filteredDocs = activeTab === 'Tout' 
-    ? documents 
-    : documents.filter(doc => doc.type === activeTab);
+  const filteredDocs = activeTab === 'Tout' ? documents : documents.filter((doc) => doc.type === activeTab)
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-80px)] pb-24 font-sans relative">
-      <div className="px-4 py-4 max-w-lg mx-auto">
-        
-        {/* Top Scrollable Tabs */}
-        <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-2 mb-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap border transition-colors ${
-                activeTab === tab
-                  ? 'bg-black text-white border-black'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Documents"
+        title="Reçus, factures et pièces associées"
+        description="Tout ce qui touche à vos paiements reste regroupé dans un espace simple à parcourir."
+      />
 
-        {/* Action Header */}
-        <div className="flex justify-end mb-4">
-          <button className="text-[13px] font-medium text-gray-800 hover:text-black">
-            Sélectionner
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+              activeTab === tab ? 'border-primary bg-primary text-white shadow-sm' : 'border-border bg-white text-text-secondary hover:bg-primary-light'
+            }`}
+          >
+            {tab}
           </button>
-        </div>
-
-        {/* Documents List */}
-        <div className="space-y-3">
-          {isLoading ? (
-            <p className="text-center text-sm text-gray-500 py-4">Chargement de vos documents...</p>
-          ) : filteredDocs.length > 0 ? (
-            filteredDocs.map((doc) => (
-              <div key={doc.id} className="bg-white rounded-2xl p-4 flex items-center border border-gray-200 shadow-sm">
-                <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center flex-shrink-0 mr-4">
-                  <FileText className="w-6 h-6 text-white" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-[15px] font-medium text-gray-900 leading-tight truncate">
-                    {doc.title}
-                  </h3>
-                  <p className="text-[13px] text-gray-500 truncate mt-0.5">
-                    {doc.description}
-                  </p>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    {doc.dateStr}
-                  </p>
-                </div>
-                <button className="p-2 ml-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 text-gray-500">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-sm text-gray-500 py-4">Aucun document trouvé pour cette catégorie.</p>
-          )}
-        </div>
+        ))}
       </div>
 
-      {/* Floating Action Button */}
-      <button className="fixed bottom-24 right-6 w-14 h-14 bg-white border border-gray-200 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.1)] flex items-center justify-center hover:bg-gray-50 transition-colors z-40">
-        <Plus className="w-6 h-6 text-black" strokeWidth={1.5} />
-      </button>
+      <div className="flex justify-end">
+        <button className="text-sm font-semibold text-primary transition hover:text-primary-dark">Sélectionner</button>
+      </div>
 
+      <section className="space-y-3">
+        {isLoading ? (
+          <div className={cardStyles('p-6 text-center text-sm text-text-secondary')}>Chargement de vos documents…</div>
+        ) : filteredDocs.length > 0 ? (
+          filteredDocs.map((doc) => (
+            <article key={doc.id} className={cardStyles('flex items-center gap-4 p-4')}>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-white">
+                <FileText className="h-6 w-6" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-text">{doc.title}</h3>
+                <p className="mt-1 truncate text-sm text-text-secondary">{doc.description}</p>
+                <p className="mt-2 text-xs text-text-muted">{doc.dateStr}</p>
+              </div>
+              <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-white text-text-secondary transition hover:bg-primary-light hover:text-text">
+                <MoreVertical className="h-5 w-5" />
+              </button>
+            </article>
+          ))
+        ) : (
+          <EmptyState icon={FolderOpen} title="Aucun document trouvé" description="Aucun document ne correspond à cette catégorie pour le moment." />
+        )}
+      </section>
+
+      <button className="fixed bottom-24 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full border border-border bg-white shadow-medium transition hover:bg-primary-light">
+        <Plus className="h-6 w-6 text-primary" />
+      </button>
     </div>
-  );
+  )
 }

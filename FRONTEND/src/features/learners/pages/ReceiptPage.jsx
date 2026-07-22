@@ -1,118 +1,110 @@
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, GraduationCap, CreditCard, QrCode } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, CreditCard, GraduationCap, QrCode, ReceiptText, ShieldCheck } from 'lucide-react'
+import { buttonStyles, cardStyles, StatusBadge, PageHeader } from '../../../components/ui/designSystem'
+import { formatDate, formatMoney } from '../../../utils/formatters'
 
 export function ReceiptPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const receiptData = {
-    nom: "Dominiek Joël",
-    matricule: "IUT202600123",
-    filiere: "Génie logiciel - licence",
-    montant: "350 000FCFA",
-    objectif: "Tranche 2",
-    transaction: "PAY-2026-3651",
-    dateRdv: "29 juin 2026 à 10:00",
-    lieu: "UBA Douala, Ange Raphaël",
-    dateEmission: "10 juillet 2026"
-  };
+    nom: 'Dominiek Joël',
+    matricule: 'IUT202600123',
+    filiere: 'Génie logiciel - licence',
+    montant: 350000,
+    objectif: 'Tranche 2',
+    transaction: 'PAY-2026-3651',
+    dateRdv: '2026-06-29T10:00:00Z',
+    lieu: 'UBA Douala, Ange Raphaël',
+    dateEmission: '2026-07-10T00:00:00Z',
+  }
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8 px-4 font-sans flex flex-col items-center">
-      
-      {/* Back button for navigation */}
-      <div className="w-full max-w-3xl mb-4 flex justify-start print:hidden">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center bg-white hover:bg-gray-50 transition-colors shadow-sm"
-        >
-          <ChevronLeft className="w-6 h-6 text-black" />
-        </button>
-      </div>
-
-      {/* Printable Receipt Container */}
-      <div className="bg-white w-full max-w-3xl shadow-lg border border-gray-200 p-8 sm:p-12 relative print:shadow-none print:border-none print:p-0">
-        
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          {/* Mock Logo */}
-          <div className="relative mr-4 flex-shrink-0">
-            <GraduationCap className="w-12 h-12 text-black" strokeWidth={1.5} />
-            <CreditCard className="w-6 h-6 text-black absolute bottom-0 -left-1 bg-white" strokeWidth={1.5} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-wide uppercase">ETUTRANSFERT - IUTD</h1>
-            <p className="text-[11px] text-gray-600">Transaction de n'importe où à tout moment</p>
-          </div>
-        </div>
-
-        {/* Separator */}
-        <div className="w-full h-[2px] bg-gray-900 mb-8"></div>
-
-        {/* Title */}
-        <div className="text-center mb-10">
-          <h2 className="text-xl font-medium text-gray-900 mb-1">Reçu de paiement</h2>
-          <p className="text-xs text-gray-500">Document officiel - Validation des frais de paiement</p>
-        </div>
-
-        {/* Details Table */}
-        <div className="space-y-0 mb-16">
-          <DetailRow label="Nom & prénom" value={receiptData.nom} />
-          <DetailRow label="Matricule" value={receiptData.matricule} />
-          <DetailRow label="Filière" value={receiptData.filiere} />
-          <DetailRow label="Montant payé" value={receiptData.montant} />
-          <DetailRow label="Objectif" value={receiptData.objectif} />
-          <DetailRow label="N° de transaction" value={receiptData.transaction} />
-          <DetailRow label="Date et heure du rendez-vous" value={receiptData.dateRdv} />
-          <DetailRow label="Lieu" value={receiptData.lieu} />
-          <DetailRow label="Date d'émission" value={receiptData.dateEmission} />
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-between items-end mt-12">
-          
-          {/* Left: Signature */}
-          <div className="w-1/3">
-            <div className="text-lg font-medium text-gray-800 border-b border-gray-400 inline-block pb-1 mb-1">
-              Nom_du_caissier
-            </div>
-            <p className="text-sm text-gray-500">Signature et cachet</p>
-          </div>
-
-          {/* Center: QR Code */}
-          <div className="w-1/3 flex flex-col items-center">
-            <QrCode className="w-24 h-24 text-black mb-2" strokeWidth={1.5} />
-            <p className="text-[10px] text-gray-600 tracking-wider">PAY - 202663651</p>
-          </div>
-
-          {/* Right: Stamp */}
-          <div className="w-1/3 flex justify-end">
-            <div className="w-24 h-24 rounded-full border border-gray-400 flex flex-col items-center justify-center opacity-70 rotate-[-15deg]">
-               <GraduationCap className="w-8 h-8 text-gray-600 mb-1" strokeWidth={1} />
-               <p className="text-[6px] text-center text-gray-500 uppercase leading-tight w-16">
-                 Cachet IUTD<br/>paiement valide
-               </p>
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Print Button */}
-      <button 
-        onClick={() => window.print()}
-        className="mt-8 bg-black text-white px-8 py-3 rounded-xl font-medium shadow-md hover:bg-gray-800 transition-colors print:hidden"
+    <div className="space-y-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-text-secondary transition hover:bg-primary-light hover:text-text"
       >
-        Imprimer le reçu
+        <ChevronLeft className="h-4 w-4" />
+        Retour
       </button>
 
+      <PageHeader
+        eyebrow="Reçu électronique"
+        title="Reçu de paiement"
+        description="Mise en page prête à imprimer avec les informations de transaction essentielles et le code de vérification."
+      />
+
+      <section className={cardStyles('overflow-hidden p-6 sm:p-8')}>
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary">
+              <GraduationCap className="h-7 w-7" />
+              <CreditCard className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-white p-0.5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold uppercase tracking-[0.18em] text-text">ETUTRANSFERT - IUTD</h1>
+              <p className="text-sm text-text-secondary">Transaction simple, traçable et vérifiable</p>
+            </div>
+          </div>
+
+          <div className="h-px w-full bg-border" />
+
+          <div className="text-center">
+            <StatusBadge status="confirmed" tone="success" />
+            <h2 className="mt-4 text-2xl font-semibold text-text">Reçu de paiement</h2>
+            <p className="mt-2 text-sm text-text-secondary">Document officiel - Validation des frais de paiement</p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ReceiptRow label="Nom et prénom" value={receiptData.nom} />
+            <ReceiptRow label="Matricule" value={receiptData.matricule} />
+            <ReceiptRow label="Filière" value={receiptData.filiere} />
+            <ReceiptRow label="Montant payé" value={formatMoney(receiptData.montant)} highlight />
+            <ReceiptRow label="Objectif" value={receiptData.objectif} />
+            <ReceiptRow label="N° de transaction" value={receiptData.transaction} />
+            <ReceiptRow label="Date et heure du rendez-vous" value={receiptData.dateRdv} />
+            <ReceiptRow label="Lieu" value={receiptData.lieu} />
+            <ReceiptRow label="Date d’émission" value={receiptData.dateEmission} />
+          </div>
+
+          <div className="grid gap-4 border-t border-border pt-6 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Vérification</p>
+              <p className="mt-2 text-sm font-semibold text-text">Code QR ou référence</p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Statut</p>
+              <p className="mt-2"><StatusBadge status="confirmed" tone="success" /></p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Date</p>
+              <p className="mt-2 text-sm font-semibold text-text">{formatDate(receiptData.dateEmission, { dateStyle: 'long' })}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-border pt-6 sm:grid-cols-3">
+            <button onClick={() => window.print()} className={buttonStyles({ variant: 'primary', block: true })}>
+              Imprimer
+            </button>
+            <button className={buttonStyles({ variant: 'secondary', block: true })}>
+              Partager
+            </button>
+            <button className={buttonStyles({ variant: 'secondary', block: true })}>
+              <ShieldCheck className="h-4 w-4" />
+              Vérifier
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
-  );
+  )
 }
 
-const DetailRow = ({ label, value }) => (
-  <div className="flex justify-between py-2.5 border-b border-gray-300">
-    <span className="text-[15px] text-gray-800">{label}</span>
-    <span className="text-[15px] text-gray-900 font-medium text-right">{value}</span>
-  </div>
-);
+function ReceiptRow({ label, value, highlight = false }) {
+  return (
+    <div className={`rounded-2xl border border-border p-4 ${highlight ? 'bg-primary-light' : 'bg-white'}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-text">{value}</p>
+    </div>
+  )
+}

@@ -1,203 +1,131 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight, Globe2, Fingerprint, BellRing, ShieldCheck, HelpCircle } from 'lucide-react'
+import { cardStyles, PageHeader, StatusBadge } from '../../../components/ui/designSystem'
 
 export function SettingsPage() {
-  // State for toggles
-  const [darkMode, setDarkMode] = useState(true);
-  const [biometrics, setBiometrics] = useState(true);
-  const [location, setLocation] = useState(true);
-  const [alerts, setAlerts] = useState(true);
-  
-  // State for Language Modal
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('Français');
-
-  const navigate = useNavigate();
+  const [language, setLanguage] = useState('Français')
+  const [darkMode, setDarkMode] = useState(true)
+  const [biometrics, setBiometrics] = useState(true)
+  const [location, setLocation] = useState(true)
+  const [alerts, setAlerts] = useState(true)
+  const [showLanguageModal, setShowLanguageModal] = useState(false)
+  const navigate = useNavigate()
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-80px)] pb-24 font-sans text-gray-900">
-      <div className="px-5 py-4 max-w-lg mx-auto space-y-6">
-        
-        {/* Apparence Section */}
-        <section>
-          <h2 className="text-[13px] font-medium text-gray-800 mb-2 ml-1">Apparence</h2>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            
-            <SettingRow 
-              label="Langue" 
-              onClick={() => setShowLanguageModal(true)}
-              rightElement={
-                <div className="flex items-center text-[11px] text-gray-400">
-                  <span className="mr-1">{selectedLanguage}</span>
-                  <ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />
-                </div>
-              } 
-            />
-            
-            <SettingRow 
-              label="Mode sombre/clair" 
-              rightElement={<Toggle isChecked={darkMode} onChange={() => setDarkMode(!darkMode)} />} 
-            />
-            
-            <SettingRow 
-              label="Taille de la police" 
-              rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
-              isLast 
-            />
-            
-          </div>
-        </section>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Réglages"
+        title="Préférences et sécurité"
+        description="Gérez l’apparence, la langue, les permissions et les accès d’aide dans un espace unique."
+        actions={<StatusBadge status="confirmed" label="Paramètres actifs" tone="primary" />}
+      />
 
-        {/* Permission & Sécurité Section */}
-        <section>
-          <h2 className="text-[13px] font-medium text-gray-800 mb-2 ml-1">Permission & Sécurité</h2>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            
-            <SettingRow 
-              label="Biométrie & Face ID" 
-              rightElement={<Toggle isChecked={biometrics} onChange={() => setBiometrics(!biometrics)} />} 
-            />
-            
-            <SettingRow 
-              label="Localisation" 
-              rightElement={<Toggle isChecked={location} onChange={() => setLocation(!location)} />} 
-            />
-            
-            <SettingRow 
-              label="Alerte" 
-              rightElement={<Toggle isChecked={alerts} onChange={() => setAlerts(!alerts)} />} 
-            />
-            
-            <SettingRow 
-              label="Mots de passe et code de sécurité" 
-              rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
-              isLast 
-            />
-            
-          </div>
-        </section>
+      <SettingsSection title="Apparence">
+        <SettingRow
+          label="Langue"
+          onClick={() => setShowLanguageModal(true)}
+          rightElement={
+            <span className="flex items-center gap-2 text-sm font-semibold text-text-muted">
+              {language}
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          }
+        />
+        <SettingRow
+          label="Mode sombre / clair"
+          rightElement={<Toggle isChecked={darkMode} onChange={() => setDarkMode(!darkMode)} />}
+        />
+        <SettingRow
+          label="Taille de police"
+          rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />}
+          isLast
+        />
+      </SettingsSection>
 
-        {/* Aide et support Section */}
-        <section>
-          <h2 className="text-[13px] font-medium text-gray-800 mb-2 ml-1">Aide et support</h2>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            
-            <SettingRow 
-              label="Support & aide" 
-              onClick={() => navigate('/apprenant/parametres/support')}
-              rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
-            />
-            
-            <SettingRow 
-              label="Assistant technique" 
-              onClick={() => navigate('/apprenant/parametres/assistant')}
-              rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
-            />
-            
-            <SettingRow 
-              label="Demande de contrôle" 
-              onClick={() => navigate('/apprenant/parametres/controle')}
-              rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
-            />
-            
-            <SettingRow 
-              label="A propos de l'application" 
-              onClick={() => navigate('/apprenant/parametres/apropos')}
-              isLast 
-            />
-            
-          </div>
-        </section>
+      <SettingsSection title="Permission et sécurité">
+        <SettingRow label="Biométrie & Face ID" rightElement={<Toggle isChecked={biometrics} onChange={() => setBiometrics(!biometrics)} />} />
+        <SettingRow label="Localisation" rightElement={<Toggle isChecked={location} onChange={() => setLocation(!location)} />} />
+        <SettingRow label="Alertes" rightElement={<Toggle isChecked={alerts} onChange={() => setAlerts(!alerts)} />} />
+        <SettingRow label="Mots de passe et code de sécurité" rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />} isLast />
+      </SettingsSection>
 
-      </div>
+      <SettingsSection title="Aide et support">
+        <SettingRow label="Support & aide" onClick={() => navigate('/apprenant/parametres/support')} rightElement={<HelpCircle className="h-4 w-4 text-text-muted" />} />
+        <SettingRow label="Assistant technique" onClick={() => navigate('/apprenant/parametres/assistant')} rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />} />
+        <SettingRow label="Demande de contrôle" onClick={() => navigate('/apprenant/parametres/controle')} rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />} />
+        <SettingRow label="À propos de l'application" onClick={() => navigate('/apprenant/parametres/apropos')} rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />} isLast />
+      </SettingsSection>
 
-      {/* LANGUAGE SELECTION MODAL */}
       {showLanguageModal && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center animate-in fade-in slide-in-from-bottom-4 duration-300">
-          
-          <div className="w-full max-w-sm px-6 flex flex-col items-center flex-1 justify-center relative pb-20">
-            <h2 className="text-2xl font-medium text-gray-900 mb-2">Langues</h2>
-            <p className="text-gray-900 mb-10 text-center">Choisissez la langue de l'application</p>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-text/50 p-4 backdrop-blur-sm sm:items-center">
+          <div className={cardStyles('w-full max-w-md p-6 sm:p-8')}>
+            <h2 className="text-2xl font-semibold text-text">Langues</h2>
+            <p className="mt-2 text-sm text-text-secondary">Choisissez la langue de l’application.</p>
 
-            <div className="w-full space-y-4">
-              
-              {/* Français */}
-              <button 
-                onClick={() => setSelectedLanguage('Français')}
-                className="w-full flex items-center justify-between p-5 rounded-2xl border border-gray-900 bg-white"
-              >
-                <span className="text-[17px] font-medium text-gray-900">Français</span>
-                <div className={`w-6 h-6 rounded-full border-[2px] flex items-center justify-center ${selectedLanguage === 'Français' ? 'border-black' : 'border-gray-400'}`}>
-                  {selectedLanguage === 'Français' && <div className="w-3 h-3 bg-black rounded-full" />}
-                </div>
-              </button>
-
-              {/* Anglais */}
-              <button 
-                onClick={() => setSelectedLanguage('Anglais')}
-                className="w-full flex items-center justify-between p-5 rounded-2xl border border-gray-900 bg-white"
-              >
-                <span className="text-[17px] font-medium text-gray-900">Anglais</span>
-                <div className={`w-6 h-6 rounded-full border-[2px] flex items-center justify-center ${selectedLanguage === 'Anglais' ? 'border-black' : 'border-gray-400'}`}>
-                  {selectedLanguage === 'Anglais' && <div className="w-3 h-3 bg-black rounded-full" />}
-                </div>
-              </button>
-              
+            <div className="mt-6 space-y-3">
+              {['Français', 'Anglais'].map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setLanguage(item)}
+                  className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition ${
+                    language === item ? 'border-primary bg-primary-light' : 'border-border bg-white hover:bg-primary-light/40'
+                  }`}
+                >
+                  <span className="text-base font-semibold text-text">{item}</span>
+                  <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${language === item ? 'border-primary' : 'border-border'}`}>
+                    {language === item ? <span className="h-3 w-3 rounded-full bg-primary" /> : null}
+                  </span>
+                </button>
+              ))}
             </div>
 
-            {/* Bottom Button */}
-            <div className="absolute bottom-10 left-6 right-6">
-              <button 
-                onClick={() => setShowLanguageModal(false)}
-                className="w-full py-4 rounded-xl bg-black text-white text-[17px] font-medium hover:bg-gray-800 transition-colors"
-              >
-                Continuer
-              </button>
-            </div>
-            
+            <button onClick={() => setShowLanguageModal(false)} className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary-dark">
+              Continuer
+            </button>
           </div>
         </div>
       )}
-
     </div>
-  );
+  )
 }
 
-/**
- * Reusable Setting Row Component
- */
+function SettingsSection({ title, children }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-text-muted">{title}</h2>
+      <div className={cardStyles('overflow-hidden')}>{children}</div>
+    </section>
+  )
+}
+
 function SettingRow({ label, rightElement, isLast, onClick }) {
   return (
-    <div 
+    <button
+      type="button"
       onClick={onClick}
-      className={`flex items-center justify-between px-4 py-3.5 bg-white ${!isLast ? 'border-b border-gray-200' : ''} hover:bg-gray-50 transition-colors cursor-pointer`}
-    >
-      <span className="text-[15px] font-normal text-gray-900">{label}</span>
-      {rightElement}
-    </div>
-  );
-}
-
-/**
- * Custom iOS-style Toggle Switch
- */
-function Toggle({ isChecked, onChange }) {
-  return (
-    <div 
-      onClick={(e) => {
-        e.stopPropagation();
-        onChange();
-      }}
-      className={`w-[42px] h-[24px] rounded-full flex items-center p-[2px] cursor-pointer transition-colors duration-200 ease-in-out ${
-        isChecked ? 'bg-black' : 'bg-gray-300'
+      className={`flex w-full items-center justify-between gap-4 border-b border-border px-4 py-4 text-left transition hover:bg-primary-light/40 ${
+        isLast ? 'border-b-0' : ''
       }`}
     >
-      <div 
-        className={`bg-white w-[20px] h-[20px] rounded-full shadow-sm transform transition-transform duration-200 ease-in-out ${
-          isChecked ? 'translate-x-[18px]' : 'translate-x-0'
-        }`}
-      />
-    </div>
-  );
+      <span className="text-sm font-medium text-text">{label}</span>
+      {rightElement}
+    </button>
+  )
+}
+
+function Toggle({ isChecked, onChange }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        onChange()
+      }}
+      className={`flex h-7 w-12 items-center rounded-full p-1 transition ${isChecked ? 'bg-primary' : 'bg-gray-300'}`}
+    >
+      <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition ${isChecked ? 'translate-x-5' : 'translate-x-0'}`} />
+    </button>
+  )
 }

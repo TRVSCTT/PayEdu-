@@ -1,125 +1,132 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ChevronLeft, CreditCard, Bell, Info, AlertTriangle } from 'lucide-react';
-import { notificationService } from '../../../services/notificationService';
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Bell, ChevronLeft, CreditCard, Info, AlertTriangle } from 'lucide-react'
+import { notificationService } from '../../../services/notificationService'
+import { cardStyles, EmptyState, PageHeader, StatusBadge } from '../../../components/ui/designSystem'
+import { formatDate } from '../../../utils/formatters'
 
 export function NotificationsPage() {
-  const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const [notifications, setNotifications] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await notificationService.listerNotifications();
-        setNotifications(data || []);
+        const data = await notificationService.listerNotifications()
+        setNotifications(data || [])
       } catch (error) {
-        console.error("Erreur lors de la récupération des notifications", error);
+        console.error('Erreur lors de la récupération des notifications', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    fetchNotifications();
-  }, []);
+    }
+    fetchNotifications()
+  }, [])
 
   const handleToutLu = async () => {
     try {
-      await notificationService.marquerToutLu();
-      setNotifications(notifications.map(n => ({ ...n, est_lu: true })));
+      await notificationService.marquerToutLu()
+      setNotifications(notifications.map((n) => ({ ...n, est_lu: true })))
     } catch (error) {
-      console.error("Erreur lors de la mise à jour des notifications", error);
+      console.error('Erreur lors de la mise à jour des notifications', error)
     }
-  };
+  }
 
   const getIconForType = (type) => {
-    switch(type) {
-      case 'PAIEMENT': return <CreditCard className="w-5 h-5" />;
-      case 'ALERTE': return <AlertTriangle className="w-5 h-5" />;
-      case 'CONFIRMATION': return <Bell className="w-5 h-5" />;
-      default: return <Info className="w-5 h-5" />;
+    switch (type) {
+      case 'PAIEMENT':
+        return <CreditCard className="h-5 w-5" />
+      case 'ALERTE':
+        return <AlertTriangle className="h-5 w-5" />
+      case 'CONFIRMATION':
+        return <Bell className="h-5 w-5" />
+      default:
+        return <Info className="h-5 w-5" />
     }
-  };
+  }
+
+  const iconTone = (type) => (type === 'PAIEMENT' ? 'primary' : type === 'ALERTE' ? 'warning' : 'info')
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Header */}
-      <header className="bg-white px-4 py-4 flex justify-between items-center border-b border-gray-100">
-        <div className="flex items-center space-x-3">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-black" />
-          </button>
-          <h1 className="text-xl font-semibold text-gray-900">Notifications</h1>
-        </div>
-        <button 
-          onClick={handleToutLu}
-          className="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors"
-        >
-          Tout lu
-        </button>
-      </header>
+    <div className="space-y-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-semibold text-text-secondary transition hover:bg-primary-light hover:text-text"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Retour
+      </button>
 
-      {/* Filters */}
-      <div className="bg-white px-4 py-3 border-b border-gray-100">
-        <div className="flex space-x-2 overflow-x-auto no-scrollbar pb-1">
-          <button className="px-4 py-1.5 bg-black text-white text-sm font-medium rounded-full whitespace-nowrap">Tout</button>
-          <button className="px-4 py-1.5 bg-white text-black text-sm font-medium rounded-full border border-gray-300 whitespace-nowrap hover:bg-gray-50">Système</button>
-          <button className="px-4 py-1.5 bg-white text-black text-sm font-medium rounded-full border border-gray-300 whitespace-nowrap hover:bg-gray-50">Paiement</button>
-          <button className="px-4 py-1.5 bg-white text-black text-sm font-medium rounded-full border border-gray-300 whitespace-nowrap hover:bg-gray-50">Confirmation</button>
-          <button className="px-4 py-1.5 bg-white text-black text-sm font-medium rounded-full border border-gray-300 whitespace-nowrap hover:bg-gray-50">Alerte</button>
-        </div>
+      <PageHeader title="Notifications" description="Gardez un œil sur les alertes de paiement, confirmations et messages système." />
+
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        {['Tout', 'Système', 'Paiement', 'Confirmation', 'Alerte'].map((label, index) => (
+          <button
+            key={label}
+            type="button"
+            className={`rounded-full border px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+              index === 0 ? 'border-primary bg-primary text-white shadow-sm' : 'border-border bg-white text-text-secondary hover:bg-primary-light'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
-      {/* Notifications List */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex justify-end">
+        <button onClick={handleToutLu} className="text-sm font-semibold text-primary transition hover:text-primary-dark">
+          Tout lu
+        </button>
+      </div>
+
+      <main className="space-y-3">
         {isLoading ? (
-          <p className="text-center text-gray-500 py-4">Chargement...</p>
+          <div className={cardStyles('p-6 text-center text-sm text-text-secondary')}>Chargement…</div>
         ) : notifications.length > 0 ? (
           notifications.map((notif) => (
-            <div key={notif.id} className={`bg-white p-4 rounded-2xl border ${notif.est_lu ? 'border-gray-100' : 'border-gray-300'} shadow-sm flex items-start space-x-4 transition-colors`}>
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${notif.est_lu ? 'bg-gray-100 text-gray-500' : 'bg-black text-white'}`}>
+            <article
+              key={notif.id}
+              className={cardStyles(`flex items-start gap-4 p-4 ${notif.est_lu ? 'opacity-90' : 'border-primary/15 bg-primary-light/40'}`)}
+            >
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${notif.est_lu ? 'bg-gray-100 text-text-muted' : 'bg-primary text-white'}`}>
                 {getIconForType(notif.type_notification)}
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className={`text-base font-semibold mb-0.5 ${notif.est_lu ? 'text-gray-600' : 'text-gray-900'}`}>{notif.titre}</h3>
-                <p className="text-sm text-gray-600 mb-1.5">{notif.message}</p>
-                <div className="flex items-center text-xs text-gray-400 space-x-3">
-                  <span>{new Date(notif.created_at).toLocaleDateString('fr-FR')}</span>
-                  <span>{new Date(notif.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-text">{notif.titre}</h3>
+                  <StatusBadge status={notif.type_notification} tone={iconTone(notif.type_notification)} />
+                </div>
+                <p className="mt-1 text-sm text-text-secondary">{notif.message}</p>
+                <div className="mt-2 flex items-center gap-3 text-xs text-text-muted">
+                  <span>{formatDate(notif.created_at, { dateStyle: 'medium' })}</span>
+                  <span>{formatDate(notif.created_at, { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
-              {!notif.est_lu && (
-                <div className="flex-shrink-0 pt-2">
-                  <span className="w-2.5 h-2.5 bg-black rounded-full block"></span>
-                </div>
-              )}
-            </div>
+              {!notif.est_lu && <span className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />}
+            </article>
           ))
         ) : (
-          <div className="text-center py-10">
-            <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Aucune notification pour le moment.</p>
-          </div>
+          <EmptyState icon={Bell} title="Aucune notification" description="Les alertes apparaîtront ici au fur et à mesure des mises à jour." />
         )}
-
-        {/* Bouton de test caché (pour débogage) */}
-        <div className="mt-8 flex justify-center">
-          <button 
-            onClick={async () => {
-              try {
-                await notificationService.creerNotificationTest();
-                const data = await notificationService.listerNotifications();
-                setNotifications(data || []);
-              } catch(e) { console.error(e); }
-            }}
-            className="px-4 py-2 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200"
-          >
-            + Ajouter une notification test
-          </button>
-        </div>
       </main>
+
+      <div className="flex justify-center">
+        <button
+          onClick={async () => {
+            try {
+              await notificationService.creerNotificationTest()
+              const data = await notificationService.listerNotifications()
+              setNotifications(data || [])
+            } catch (e) {
+              console.error(e)
+            }
+          }}
+          className="rounded-full border border-border bg-white px-4 py-2 text-xs font-semibold text-text-secondary transition hover:bg-primary-light hover:text-text"
+        >
+          + Ajouter une notification test
+        </button>
+      </div>
     </div>
-  );
+  )
 }

@@ -10,6 +10,7 @@ export const API_ROUTES = {
     REGISTER_ADMIN: "/auth/register/admin",
     REGISTER_ESTABLISHMENT: "/auth/register/etablissement",
     REGISTER_LEARNER: "/auth/register/apprenant",
+    REGISTER_CAISSE: "/auth/register/caisse",
   },
   PAYMENTS: {
     CREATE: "/payments",

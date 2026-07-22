@@ -1,71 +1,67 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TopNavTabs } from '../../../components/ui/TopNavTabs';
-import { walletService } from '../../../services/walletService';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, WalletCards } from 'lucide-react'
+import { TopNavTabs } from '../../../components/ui/TopNavTabs'
+import { walletService } from '../../../services/walletService'
+import { PageHeader, cardStyles, buttonStyles, EmptyState } from '../../../components/ui/designSystem'
 
 export function WalletPage() {
-  const navigate = useNavigate();
-  const [methods, setMethods] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const [methods, setMethods] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchMethods = async () => {
       try {
-        const data = await walletService.getPaymentMethods();
-        setMethods(data || []);
+        const data = await walletService.getPaymentMethods()
+        setMethods(data || [])
       } catch (error) {
-        console.error(error);
+        console.error(error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-    fetchMethods();
-  }, []);
+    }
+    fetchMethods()
+  }, [])
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
-      <div className="px-6 py-4 max-w-lg mx-auto">
-        
-        <TopNavTabs />
+    <div className="space-y-6">
+      <TopNavTabs />
 
-        {/* Saved Payment Methods Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          {isLoading ? (
-            <div className="col-span-2 text-center py-4 text-sm text-gray-500">Chargement de votre portefeuille...</div>
-          ) : methods.length > 0 ? (
-            methods.map((method) => (
-            <div 
-              key={method.id} 
-              className="bg-black text-white p-4 rounded-xl relative shadow-md flex flex-col justify-between aspect-[1.8/1]"
-            >
-              <div className="absolute top-3 right-3">
-                <div className="w-4 h-4 bg-white rounded-full"></div>
+      <PageHeader title="Portefeuille" description="Retrouvez vos moyens de paiement enregistrés dans une interface claire et mobile-friendly." />
+
+      <section className="grid gap-4 sm:grid-cols-2">
+        {isLoading ? (
+          <div className={cardStyles('p-6 text-center text-sm text-text-secondary sm:col-span-2')}>Chargement de votre portefeuille…</div>
+        ) : methods.length > 0 ? (
+          methods.map((method) => (
+            <article key={method.id} className="relative overflow-hidden rounded-3xl border border-primary/10 bg-primary p-5 text-white shadow-elevated">
+              <div className="absolute right-4 top-4 h-4 w-4 rounded-full bg-white/80" />
+              <div className="flex h-full flex-col justify-between gap-8">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">Moyen enregistré</p>
+                  <h3 className="mt-2 text-2xl font-semibold">{method.fournisseur}</h3>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold tracking-wider text-white/90">{method.numero_masque}</p>
+                  <p className="mt-1 text-xs text-white/70">{method.nom_titulaire}</p>
+                </div>
               </div>
-              <h3 className="text-[17px] font-medium tracking-wide mt-1">{method.fournisseur}</h3>
-              <div>
-                <p className="text-[13px] font-medium opacity-90 mb-1 tracking-wider">{method.numero_masque}</p>
-                <p className="text-[11px] text-gray-400">{method.nom_titulaire}</p>
-              </div>
-            </div>
+            </article>
           ))
-          ) : (
-            <div className="col-span-2 text-center py-8 bg-white rounded-xl border border-gray-200">
-              <p className="text-gray-500 text-sm">Aucun moyen de paiement enregistré.</p>
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="sm:col-span-2">
+            <EmptyState icon={WalletCards} title="Aucun moyen de paiement enregistré" description="Ajoutez un moyen de paiement pour accélérer vos prochains règlements." />
+          </div>
+        )}
+      </section>
 
-        {/* Add button */}
-        <div className="mt-8 flex justify-end pr-2">
-          <button 
-            onClick={() => navigate('/apprenant/portefeuille/nouveau')}
-            className="text-[15px] font-medium text-gray-900 hover:text-gray-600 transition-colors flex items-center gap-1"
-          >
-            <span>+ Ajouter</span>
-          </button>
-        </div>
-
+      <div className="flex justify-end">
+        <button onClick={() => navigate('/apprenant/portefeuille/nouveau')} className={buttonStyles({ variant: 'primary' })}>
+          <Plus className="h-4 w-4" />
+          Ajouter
+        </button>
       </div>
     </div>
-  );
+  )
 }

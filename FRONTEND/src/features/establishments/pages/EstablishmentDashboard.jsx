@@ -1,25 +1,47 @@
-import { DashboardLayout } from '../../../components/layout/DashboardLayout';
-import { useAuth } from '../../../store/authStore';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import { LayoutDashboard, Users, WalletCards, FileText } from 'lucide-react'
+import { DashboardLayout } from '../../../components/layout/DashboardLayout'
+import { PageHeader, StatCard, cardStyles, buttonStyles } from '../../../components/ui/designSystem'
 
 export function EstablishmentDashboard() {
-  const { user } = useAuth();
-  
   return (
-    <DashboardLayout title="Espace Établissement">
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">Bienvenue, Gestionnaire</h3>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500 mb-6">
-          Gérez vos apprenants et le suivi des paiements.
-        </p>
-        
-        <Link
-          to="/etablissement/apprenants/nouveau"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-DEFAULT hover:bg-primary-dark"
-        >
-          Créer un apprenant
-        </Link>
-      </div>
+    <DashboardLayout
+      title="Espace établissement"
+      description="Pilotez les apprenants, les campagnes de frais et le suivi des paiements dans une interface claire."
+      actions={
+        <div className="flex gap-2">
+          <Link to="/etablissement/apprenants/nouveau" className={buttonStyles({ variant: 'primary' })}>
+            Ajouter un apprenant
+          </Link>
+          <Link to="/etablissement/caisses/nouveau" className={buttonStyles({ variant: 'secondary' })}>
+            Ajouter un guichet
+          </Link>
+        </div>
+      }
+    >
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={Users} label="Apprenants" value="Gérés" helper="Accès rapide à l’enregistrement des nouveaux profils" tone="secondary" />
+        <StatCard icon={WalletCards} label="Paiements" value="Suivis" helper="Les statuts restent visibles et cohérents" tone="primary" />
+        <StatCard icon={FileText} label="Reçus" value="Vérifiables" helper="Les documents restent traçables" tone="info" />
+        <StatCard icon={LayoutDashboard} label="Configuration" value="Simple" helper="Actions essentielles regroupées" tone="success" />
+      </section>
+
+      <section className={cardStyles('p-6')}>
+        <PageHeader
+          title="Raccourcis utiles"
+          description="Les pages existantes restent accessibles sans encombrer l’interface."
+        />
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link to="/etablissement/apprenants/nouveau" className={buttonStyles({ variant: 'primary' })}>
+            Créer un apprenant
+          </Link>
+          <Link to="/etablissement/caisses/nouveau" className={buttonStyles({ variant: 'secondary' })}>
+            Créer un compte Banque / Caisse
+          </Link>
+          <button className={buttonStyles({ variant: 'secondary' })}>Consulter les paiements</button>
+          <button className={buttonStyles({ variant: 'secondary' })}>Télécharger les rapports</button>
+        </div>
+      </section>
     </DashboardLayout>
-  );
+  )
 }

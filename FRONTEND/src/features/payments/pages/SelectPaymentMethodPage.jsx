@@ -1,94 +1,98 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Phone, CreditCard } from 'lucide-react';
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, CreditCard, Phone, ShieldCheck } from 'lucide-react'
+import { Stepper, PageHeader, cardStyles, buttonStyles, StatusBadge } from '../../../components/ui/designSystem'
+
+const STEPS = [
+  { label: 'Université' },
+  { label: 'Bénéficiaire' },
+  { label: 'Type de frais' },
+  { label: 'Moyen de paiement' },
+  { label: 'Vérification' },
+  { label: 'Confirmation' },
+]
 
 export function SelectPaymentMethodPage() {
-  const navigate = useNavigate();
-  const [selectedMethod, setSelectedMethod] = useState('mobile');
+  const navigate = useNavigate()
+  const [selectedMethod, setSelectedMethod] = useState('mobile')
 
   const handleContinue = () => {
-    navigate('/apprenant/paiements/options');
-  };
+    navigate('/apprenant/paiements/options')
+  }
 
   return (
-    <div className="bg-[#fafafa] min-h-[calc(100vh-140px)] pb-8 font-sans">
-      <div className="px-6 py-4 max-w-lg mx-auto">
-        
-        {/* Top Tabs (Payer, Portefeuille, Histoire, RDV) */}
-        <div className="flex bg-white rounded-2xl border border-gray-200 p-1.5 mb-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <button className="flex-1 bg-black text-white rounded-xl py-2.5 text-sm font-medium">Payer</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Portefeuille</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">Histoire</button>
-          <button className="flex-1 text-gray-600 py-2.5 text-sm font-medium hover:bg-gray-50 rounded-xl transition-colors">RDV</button>
-        </div>
-        
-        {/* Progress bar - Step 3 */}
-        <div className="flex space-x-1.5 mb-6 px-1">
-          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
-          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
-          <div className="h-1.5 flex-1 bg-black rounded-full"></div>
-          <div className="h-1.5 flex-1 bg-white rounded-full border border-gray-300"></div>
-        </div>
+    <div className="space-y-6">
+      <Stepper steps={STEPS} currentStep={3} />
 
-        {/* Back and Title */}
-        <div className="flex items-center space-x-4 mb-6">
-          <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center bg-white hover:bg-gray-50 transition-colors">
-            <ChevronLeft className="w-6 h-6 text-black" />
-          </button>
-          <h2 className="text-[17px] font-medium text-gray-900">Choisissez un moyen de paiement</h2>
-        </div>
-
-        {/* Payment Methods */}
-        <div className="space-y-4">
-          
-          {/* Mobile */}
-          <div 
-            onClick={() => setSelectedMethod('mobile')}
-            className={`bg-white p-5 rounded-2xl border flex items-center cursor-pointer transition-colors shadow-sm ${selectedMethod === 'mobile' ? 'border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
-          >
-            <div className="mr-5 flex-shrink-0">
-              <Phone className="w-6 h-6 fill-black" strokeWidth={0} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-[18px] font-medium text-gray-900">Mobile</h3>
-            </div>
-            <div className="flex-shrink-0">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${selectedMethod === 'mobile' ? 'border-black' : 'border-gray-400'}`}>
-                {selectedMethod === 'mobile' && <div className="w-3 h-3 bg-black rounded-full"></div>}
-              </div>
-            </div>
-          </div>
-
-          {/* Carte VISA */}
-          <div 
-            onClick={() => setSelectedMethod('visa')}
-            className={`bg-white p-5 rounded-2xl border flex items-center cursor-pointer transition-colors shadow-sm ${selectedMethod === 'visa' ? 'border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
-          >
-            <div className="mr-5 flex-shrink-0">
-              <CreditCard className="w-6 h-6 text-black fill-black" strokeWidth={0} />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-[18px] font-medium text-gray-900">Carte VISA</h3>
-            </div>
-            <div className="flex-shrink-0">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${selectedMethod === 'visa' ? 'border-black' : 'border-gray-400'}`}>
-                {selectedMethod === 'visa' && <div className="w-3 h-3 bg-black rounded-full"></div>}
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Bottom Section */}
-        <div className="mt-12 mb-5">
-          <button 
-            onClick={handleContinue}
-            className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
-          >
-            Continuer
-          </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-text transition hover:bg-primary-light"
+          aria-label="Retour"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Étape 4</p>
+          <h2 className="text-xl font-semibold text-text">Choisissez un moyen de paiement</h2>
         </div>
       </div>
+
+      <PageHeader
+        description="Le mode sélectionné doit rester lisible, simple à confirmer et adapté aux opérations mobiles."
+      />
+
+      <section className="grid gap-4">
+        <button
+          type="button"
+          onClick={() => setSelectedMethod('mobile')}
+          className={cardStyles(`flex items-center gap-4 p-5 text-left transition ${selectedMethod === 'mobile' ? 'border-primary bg-primary-light shadow-sm' : 'hover:border-primary/15 hover:bg-primary-light/40'}`)}
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
+            <Phone className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base font-semibold text-text">Compte mobile</h3>
+            <p className="mt-1 text-sm text-text-secondary">Orange Money, MTN MoMo ou autre compte mobile autorisé.</p>
+          </div>
+          <StatusBadge status={selectedMethod === 'mobile' ? 'confirmed' : 'pending'} label={selectedMethod === 'mobile' ? 'Sélectionné' : 'Disponible'} tone={selectedMethod === 'mobile' ? 'success' : 'neutral'} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedMethod('visa')}
+          className={cardStyles(`flex items-center gap-4 p-5 text-left transition ${selectedMethod === 'visa' ? 'border-primary bg-primary-light shadow-sm' : 'hover:border-primary/15 hover:bg-primary-light/40'}`)}
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-primary shadow-sm">
+            <CreditCard className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base font-semibold text-text">Carte bancaire</h3>
+            <p className="mt-1 text-sm text-text-secondary">Paiement par carte avec vérification et sécurisation du flux.</p>
+          </div>
+          <StatusBadge status={selectedMethod === 'visa' ? 'confirmed' : 'pending'} label={selectedMethod === 'visa' ? 'Sélectionné' : 'Disponible'} tone={selectedMethod === 'visa' ? 'success' : 'neutral'} />
+        </button>
+      </section>
+
+      <section className={cardStyles('p-5')}>
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-light text-primary">
+            <ShieldCheck className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-text">Paiement guidé</h3>
+            <p className="mt-1 text-sm leading-6 text-text-secondary">
+              Le moyen sélectionné sera utilisé pour les étapes de vérification et de confirmation suivantes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="pt-2">
+        <button onClick={handleContinue} className={buttonStyles({ variant: 'primary', size: 'lg', block: true })}>
+          Continuer
+        </button>
+      </div>
     </div>
-  );
+  )
 }

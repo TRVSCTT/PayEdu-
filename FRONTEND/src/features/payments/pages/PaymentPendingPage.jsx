@@ -1,40 +1,51 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, Hourglass, LifeBuoy, ReceiptText, RefreshCcw } from 'lucide-react'
+import { cardStyles, buttonStyles, StatusBadge, PageHeader } from '../../../components/ui/designSystem'
 
 export function PaymentPendingPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
-    <div className="bg-white min-h-screen flex flex-col items-center justify-between p-6 font-sans">
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto">
-        <div className="mb-8">
-          {/* Custom clock circle SVG matching the mockup */}
-          <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" stroke="#222" strokeWidth="6" fill="white" />
-            <path d="M50 24 L50 50 L68 50" stroke="#222" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-            {/* Clock ticks */}
-            <path d="M50 10 L50 16 M90 50 L84 50 M50 90 L50 84 M10 50 L16 50" stroke="#222" strokeWidth="4" strokeLinecap="round" />
-            <path d="M78 22 L74 26 M78 78 L74 74 M22 78 L26 74 M22 22 L26 26" stroke="#222" strokeWidth="4" strokeLinecap="round" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-medium text-black mb-6 text-center tracking-wide">Enregistrement en cours</h1>
-        <p className="text-center text-gray-800 text-[15px] leading-relaxed max-w-[280px]">
-          Vous êtes mis en attente. Un reçu vous sera envoyé après enregistrement
-        </p>
-      </div>
+    <div className="flex min-h-[70vh] items-center justify-center py-6">
+      <div className="w-full max-w-2xl space-y-6">
+        <PageHeader
+          eyebrow="En attente"
+          title="Enregistrement en cours"
+          description="Le paiement a été reçu mais reste en attente de validation ou de rapprochement côté plateforme."
+        />
 
-      <div className="w-full max-w-sm mx-auto pb-6">
-        <div className="flex justify-center items-center space-x-2 mb-10">
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-gray-400 bg-white"></div>
-          <div className="w-2.5 h-2.5 rounded-full bg-black"></div>
-          <div className="w-2.5 h-2.5 rounded-full border-2 border-gray-400 bg-white"></div>
-        </div>
-        <button 
-          onClick={() => navigate('/apprenant/paiements/rendez-vous')}
-          className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
-        >
-          Continuer
-        </button>
+        <section className={cardStyles('overflow-hidden')}>
+          <div className="flex flex-col items-center gap-6 px-6 py-10 text-center sm:px-10">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-warning-light text-warning">
+              <Hourglass className="h-12 w-12" />
+            </div>
+            <div className="space-y-3">
+              <StatusBadge status="pending" tone="warning" />
+              <p className="max-w-xl text-sm leading-6 text-text-secondary">
+                Votre transaction est en cours de traitement. Le reçu sera confirmé dès que la validation sera terminée.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-border bg-background p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
+            <button onClick={() => navigate('/apprenant/paiements/recapitulatif')} className={buttonStyles({ variant: 'secondary', block: true })}>
+              Voir le détail
+            </button>
+            <button onClick={() => navigate('/apprenant/paiements/nouveau')} className={buttonStyles({ variant: 'secondary', block: true })}>
+              <RefreshCcw className="h-4 w-4" />
+              Réessayer
+            </button>
+            <Link to="/apprenant/recu" className={buttonStyles({ variant: 'primary', block: true })}>
+              <ReceiptText className="h-4 w-4" />
+              Reçu
+            </Link>
+            <Link to="/apprenant/parametres/support" className={buttonStyles({ variant: 'secondary', block: true })}>
+              <LifeBuoy className="h-4 w-4" />
+              Assistance
+            </Link>
+          </div>
+        </section>
       </div>
     </div>
-  );
+  )
 }

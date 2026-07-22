@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Calendar } from 'lucide-react';
 import { TopNavTabs } from '../../../components/ui/TopNavTabs';
+import { walletService } from '../../../services/walletService';
 
 export function AddPaymentMethodPage() {
   const navigate = useNavigate();
@@ -10,10 +11,26 @@ export function AddPaymentMethodPage() {
   const [phone, setPhone] = useState('');
   const [fundsOrigin, setFundsOrigin] = useState('');
   const [holderName, setHolderName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSave = () => {
-    // Dans une vraie application, on appellerait l'API ici
-    navigate('/apprenant/portefeuille');
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setIsSaving(true);
+    setError(null);
+    try {
+      await walletService.addPaymentMethod({
+        type_methode: methodType,
+        fournisseur: operator,
+        numero_masque: phone,
+        nom_titulaire: holderName,
+        origine_fonds: fundsOrigin || null
+      });
+      navigate('/apprenant/portefeuille');
+    } catch (err) {
+      setError("Erreur lors de l'enregistrement du moyen de paiement.");
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -157,12 +174,15 @@ export function AddPaymentMethodPage() {
           </form>
         </div>
 
+        {error && <p className="text-red-500 text-sm mt-4 text-center">{error}</p>}
+
         <div className="mt-8">
           <button 
             onClick={handleSave}
-            className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md"
+            disabled={isSaving}
+            className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors shadow-md disabled:opacity-50"
           >
-            Enregistrer
+            {isSaving ? "Enregistrement..." : "Enregistrer"}
           </button>
         </div>
 

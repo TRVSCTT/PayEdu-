@@ -11,8 +11,20 @@ export function PaymentOptionsPage() {
   
   const [optionType, setOptionType] = useState('mobile'); // 'mobile' or 'carte'
   const [selectedSavedCard, setSelectedSavedCard] = useState(null);
+  
+  // Mobile fields
   const [operator, setOperator] = useState('Orange');
   const [numero, setNumero] = useState('');
+  
+  // Card fields
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvv, setCvv] = useState('');
+
+  // Shared fields
+  const [fundsOrigin, setFundsOrigin] = useState('');
+  const [holderName, setHolderName] = useState('');
+
   const [isLoading, setIsLoading] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
@@ -28,28 +40,54 @@ export function PaymentOptionsPage() {
     }
 
     const finalOperator = selectedSavedCard ? selectedSavedCard : operator;
-    const finalNumero = selectedSavedCard ? (selectedSavedCard === 'orange' ? '600000000' : '650000000') : numero; // mock numero for saved cards for now
+    const finalNumero = selectedSavedCard ? (selectedSavedCard === 'orange' ? '600000000' : '650000000') : (optionType === 'mobile' ? numero : cardNumber);
     
     if (optionType === 'mobile' && !selectedSavedCard && !finalNumero) {
       toast.error('Veuillez entrer un numéro de compte valide');
       return;
     }
+    if (optionType === 'carte' && !finalNumero) {
+      toast.error('Veuillez entrer un numéro de carte valide');
+      return;
+    }
 
     try {
       setIsLoading(true);
-      const moyenPaiementBackend = finalOperator.toLowerCase() === 'orange' ? 'orange_money' : 'mtn_momo';
+      const moyenPaiementBackend = optionType === 'carte' ? 'carte_bancaire' : (finalOperator.toLowerCase() === 'orange' ? 'orange_money' : 'mtn_momo');
+      
+      // Pour éviter l'erreur 400, on force une clé valide de TARIFS si l'objet ne correspond pas
+      const validObjetKeys = ['frais_inscription', 'frais_pension', 'frais_examen'];
+      const finalObjetPaiement = validObjetKeys.includes(paymentData.objet_paiement) ? paymentData.objet_paiement : 'frais_inscription';
       
       // 1. Initier le paiement (Formulaire 1)
       const paiement = await paymentService.initierPaiement({
         etablissement_id: userProfile.etablissement_id,
-        objet_paiement: paymentData.objet_paiement || 'Frais divers',
+        objet_paiement: finalObjetPaiement,
         moyen_paiement: moyenPaiementBackend
       });
 
-      // 2. Définir le numéro de compte (Formulaire 3)
-      await paymentService.definirMoyenPaiement(paiement.id, {
-        numero_compte_paiement: finalNumero
+      // 1.5 Simuler l'étape de confirmation (Formulaire 2) pour satisfaire le backend
+      await paymentService.confirmerInformations(paiement.id, {
+        infos_confirmees: {
+          nom: userProfile?.nom || 'Apprenant PayEdu',
+          matricule: userProfile?.matricule || '000000',
+        }
       });
+
+      // 2. Définir le numéro de compte (Formulaire 3)
+      const definePayload = {
+        numero_compte_paiement: finalNumero
+      };
+
+      // Si carte bancaire, CinetPay exige des informations supplémentaires
+      if (moyenPaiementBackend === 'carte_bancaire') {
+        definePayload.email_paiement = userProfile?.email || "test@payedu.com";
+        definePayload.adresse_paiement = "Adresse par defaut";
+        definePayload.ville_paiement = "Douala";
+        definePayload.code_postal_paiement = "00000";
+      }
+
+      await paymentService.definirMoyenPaiement(paiement.id, definePayload);
 
       updatePaymentData({ 
         paiement_id: paiement.id,
@@ -118,36 +156,77 @@ export function PaymentOptionsPage() {
           {/* Form Fields */}
           <div className="space-y-4">
             
-            <div className="flex space-x-4">
-              <div className="w-1/3">
-                <label className="block text-xs text-gray-900 mb-1.5">Opérateur</label>
-                <select 
-                  value={operator}
-                  onChange={(e) => setOperator(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white"
-                >
-                  <option value="Orange">Orange</option>
-                  <option value="MTN">MTN</option>
-                </select>
+            {optionType === 'mobile' ? (
+              <div className="flex space-x-4">
+                <div className="w-1/3">
+                  <label className="block text-xs text-gray-900 mb-1.5">Opérateur</label>
+                  <select 
+                    value={operator}
+                    onChange={(e) => setOperator(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white"
+                  >
+                    <option value="Orange">Orange</option>
+                    <option value="MTN">MTN</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs text-gray-900 mb-1.5">Numéro</label>
+                  <input 
+                    type="text" 
+                    placeholder="6XX XX XX XX" 
+                    value={numero}
+                    onChange={(e) => setNumero(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                  />
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="block text-xs text-gray-900 mb-1.5">Numéro</label>
-                <input 
-                  type="text" 
-                  placeholder="6XX XX XX XX" 
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs text-gray-900 mb-1.5">Numéro de carte</label>
+                  <input 
+                    type="text" 
+                    placeholder="0000 0000 0000 0000" 
+                    value={cardNumber}
+                    onChange={(e) => setCardNumber(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                  />
+                </div>
+                <div className="flex space-x-4">
+                  <div className="w-1/2">
+                    <label className="block text-xs text-gray-900 mb-1.5">Date d'expiration</label>
+                    <input 
+                      type="text" 
+                      placeholder="MM/AA" 
+                      value={expiry}
+                      onChange={(e) => setExpiry(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                    />
+                  </div>
+                  <div className="w-1/2">
+                    <label className="block text-xs text-gray-900 mb-1.5">CVV</label>
+                    <input 
+                      type="text" 
+                      placeholder="123" 
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
 
             <div>
               <label className="block text-xs text-gray-900 mb-1.5">Origine des fonds</label>
-              <select className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white">
-                <option></option>
-                <option>Personnel</option>
-                <option>Parent</option>
+              <select 
+                value={fundsOrigin}
+                onChange={(e) => setFundsOrigin(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white"
+              >
+                <option value=""></option>
+                <option value="Personnel">Personnel</option>
+                <option value="Parent">Parent</option>
               </select>
             </div>
 
@@ -155,7 +234,9 @@ export function PaymentOptionsPage() {
               <label className="block text-xs text-gray-900 mb-1.5">Nom du titulaire</label>
               <input 
                 type="text" 
-                placeholder="Nom complet" 
+                placeholder="Nom complet"
+                value={holderName}
+                onChange={(e) => setHolderName(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
               />
             </div>

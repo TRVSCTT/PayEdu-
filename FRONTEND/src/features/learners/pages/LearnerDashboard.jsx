@@ -56,7 +56,7 @@ export function LearnerDashboard() {
         </div>
       ) : (
         <div className="bg-[#0a0a0a] text-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
-          <h2 className="text-2xl font-semibold tracking-tight mb-2">Tout est à jour ! 🎉</h2>
+          <h2 className="text-2xl font-semibold tracking-tight mb-2">Tout est à jour ! </h2>
           <p className="text-sm text-gray-300 mb-6">Vous n'avez aucun frais en attente de paiement.</p>
           <Link 
             to="/apprenant/paiements/nouveau"

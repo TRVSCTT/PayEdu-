@@ -27,6 +27,16 @@ export const paymentService = {
   },
 
   /**
+   * Étape 2 : Confirmer les informations du quitus
+   * @param {string} paiementId
+   * @param {Object} data - { infos_confirmees: { nom, matricule, ... } }
+   */
+  confirmerInformations: async (paiementId, data) => {
+    const response = await apiClient.patch(`/payments/${paiementId}/informations`, data);
+    return response.data;
+  },
+
+  /**
    * Étape 3 : Définir le moyen de paiement et le numéro de compte
    * @param {string} paiementId
    * @param {Object} data - { numero_compte_paiement }

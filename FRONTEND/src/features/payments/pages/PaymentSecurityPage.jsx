@@ -1,9 +1,10 @@
 import { ShieldCheck, ScanFace, Fingerprint } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 export function PaymentSecurityPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
+  const navigate = useNavigate();
 
   const handleCodeChange = (index, value) => {
     if (value.length > 1) return; // Prevent multiple characters
@@ -86,6 +87,7 @@ export function PaymentSecurityPage() {
           {/* Bouton Accéder */}
           <button 
             type="button" 
+            onClick={() => navigate('/apprenant/paiements/nouveau')}
             className="w-full bg-black text-white py-4 rounded-xl text-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Accéder

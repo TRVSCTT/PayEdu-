@@ -1,12 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, CheckCircle2, Delete } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function PaymentSummaryPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [pinCode, setPinCode] = useState('');
+
+  // Default to orange (4 digits) if no operator passed
+  const operator = location.state?.operator?.toLowerCase() || 'orange';
+  const pinLength = operator === 'mtn' ? 5 : 4;
 
   const handlePayClick = () => {
     setShowSecurityModal(true);
@@ -16,12 +21,12 @@ export function PaymentSummaryPage() {
     if (val === 'delete') {
       setPinCode(prev => prev.slice(0, -1));
     } else {
-      if (pinCode.length < 6) {
+      if (pinCode.length < pinLength) {
         const newPin = pinCode + val;
         setPinCode(newPin);
         
-        // Auto submit if 6 digits reached
-        if (newPin.length === 6) {
+        // Auto submit if required digits reached
+        if (newPin.length === pinLength) {
           setTimeout(() => {
             setShowSecurityModal(false);
             toast.success('Paiement initié avec succès !');
@@ -136,7 +141,7 @@ export function PaymentSummaryPage() {
             
             {/* PIN Inputs */}
             <div className="flex justify-center space-x-2 mb-10">
-              {[0, 1, 2, 3, 4, 5].map((index) => (
+              {Array.from({ length: pinLength }).map((_, index) => (
                 <div 
                   key={index} 
                   className={`w-10 h-10 sm:w-12 sm:h-12 border ${pinCode.length > index ? 'border-black bg-black' : 'border-gray-400 bg-white'} rounded-xl flex items-center justify-center transition-all`}

@@ -6,9 +6,11 @@ export function PaymentOptionsPage() {
   const navigate = useNavigate();
   const [optionType, setOptionType] = useState('mobile'); // 'mobile' or 'carte'
   const [selectedSavedCard, setSelectedSavedCard] = useState(null);
+  const [operator, setOperator] = useState('Orange');
 
   const handleContinue = () => {
-    navigate('/apprenant/paiements/recapitulatif');
+    const finalOperator = selectedSavedCard ? selectedSavedCard : operator;
+    navigate('/apprenant/paiements/recapitulatif', { state: { operator: finalOperator } });
   };
 
   return (
@@ -66,9 +68,13 @@ export function PaymentOptionsPage() {
             <div className="flex space-x-4">
               <div className="w-1/3">
                 <label className="block text-xs text-gray-900 mb-1.5">Opérateur</label>
-                <select className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white">
-                  <option>Orange</option>
-                  <option>MTN</option>
+                <select 
+                  value={operator}
+                  onChange={(e) => setOperator(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-400 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black bg-white"
+                >
+                  <option value="Orange">Orange</option>
+                  <option value="MTN">MTN</option>
                 </select>
               </div>
               <div className="flex-1">

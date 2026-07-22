@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, X, Download, QrCode } from 'lucide-react';
 import { TopNavTabs } from '../../../components/ui/TopNavTabs';
 import { appointmentService } from '../../../services/appointmentService';
 
 export function AppointmentsPage() {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedApt, setSelectedApt] = useState(null);
+  const [movingApt, setMovingApt] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -109,7 +114,10 @@ export function AppointmentsPage() {
 
                 {/* Buttons */}
                 <div className="flex space-x-3 mb-4">
-                  <button className="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors">
+                  <button 
+                    onClick={() => setSelectedApt(apt)}
+                    className="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors"
+                  >
                     Afficher
                   </button>
                   <button className="flex-1 py-2.5 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors">
@@ -119,7 +127,13 @@ export function AppointmentsPage() {
 
                 {/* Footer link */}
                 <div className="text-center">
-                  <button className="text-[14px] font-medium text-gray-900 hover:text-gray-600 transition-colors">
+                  <button 
+                    onClick={() => {
+                      setMovingApt(apt);
+                      setSelectedSlot(null);
+                    }}
+                    className="text-[14px] font-medium text-gray-900 hover:text-gray-600 transition-colors"
+                  >
                     Déplacer
                   </button>
                 </div>
@@ -131,6 +145,122 @@ export function AppointmentsPage() {
         </div>
 
       </div>
+
+      {/* MODAL QR CODE */}
+      {selectedApt && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full sm:max-w-md rounded-t-[32px] sm:rounded-3xl p-6 sm:p-8 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 shadow-2xl relative">
+            
+            {/* Handle bar for mobile */}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+
+            <button 
+              onClick={() => setSelectedApt(null)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+
+            <h2 className="text-xl font-medium text-center text-gray-900 mb-6 mt-2">Rendez vous de validation</h2>
+            
+            <div className="flex justify-center mb-4">
+              <QrCode className="w-[180px] h-[180px] text-black" strokeWidth={1} />
+            </div>
+            
+            <p className="text-center text-[13px] text-gray-800 mb-8 font-medium">
+              QR code d'accès - A présenter à l'agence
+            </p>
+
+            <div className="space-y-4 mb-8 px-1">
+              <DetailRow label="Date" value="26 juin 2026" />
+              <DetailRow label="Heure" value="10:00 AM" />
+              <DetailRow label="Lieu" value="UBA, Douala - Ange Raphaël" />
+              <DetailRow label="Statut" value="Planifié" />
+              <DetailRow label="N° de passage" value="26.200" />
+            </div>
+
+            <div className="space-y-3 pb-4 sm:pb-0">
+              <button className="w-full flex items-center justify-center py-4 rounded-xl bg-black text-white text-[15px] font-medium hover:bg-gray-800 transition-colors">
+                <Download className="w-5 h-5 mr-2" />
+                Télécharger le reçu
+              </button>
+              <button 
+                onClick={() => navigate('/recu')}
+                className="w-full py-4 rounded-xl border border-gray-300 text-[15px] font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors"
+              >
+                Afficher le reçu
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DEPLACER LE RDV */}
+      {movingApt && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full sm:max-w-md rounded-t-[32px] sm:rounded-3xl p-6 sm:p-8 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300 shadow-2xl relative min-h-[50vh] flex flex-col">
+            
+            {/* Handle bar for mobile */}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6 sm:hidden"></div>
+
+            <div className="flex-1">
+              <h2 className="text-[20px] font-medium text-center text-gray-900 mb-1 mt-2">Déplacer le rdv</h2>
+              <p className="text-center text-[14px] text-gray-700 mb-8">Choisissez un nouveau créneau :</p>
+              
+              <div className="flex space-x-3 mb-8">
+                {/* Slot 1 */}
+                <button 
+                  onClick={() => setSelectedSlot('slot1')}
+                  className={`flex-1 flex flex-col items-center justify-center py-4 border rounded-xl transition-all ${selectedSlot === 'slot1' ? 'border-black bg-black text-white' : 'border-gray-300 text-gray-900 hover:border-gray-400'}`}
+                >
+                  <span className="text-[15px] font-medium mb-0.5">mar.30 juin</span>
+                  <span className={`text-[15px] ${selectedSlot === 'slot1' ? 'text-gray-200' : 'text-gray-500'}`}>09:00</span>
+                </button>
+
+                {/* Slot 2 */}
+                <button 
+                  onClick={() => setSelectedSlot('slot2')}
+                  className={`flex-1 flex flex-col items-center justify-center py-4 border rounded-xl transition-all ${selectedSlot === 'slot2' ? 'border-black bg-black text-white' : 'border-gray-300 text-gray-900 hover:border-gray-400'}`}
+                >
+                  <span className="text-[15px] font-medium mb-0.5">jeu.01 juil</span>
+                  <span className={`text-[15px] ${selectedSlot === 'slot2' ? 'text-gray-200' : 'text-gray-500'}`}>13:00</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-auto pt-6 space-y-4">
+              <button 
+                onClick={() => {
+                  // Simulate moving
+                  setMovingApt(null);
+                }}
+                disabled={!selectedSlot}
+                className="w-full flex items-center justify-center py-4 rounded-xl bg-black text-white text-[15px] font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
+              >
+                Confirmer le déplacement
+              </button>
+              <button 
+                onClick={() => setMovingApt(null)}
+                className="w-full text-center text-[15px] font-medium text-gray-800 hover:text-black pb-2"
+              >
+                Annuler
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+
+// Helper pour les lignes en pointillés
+const DetailRow = ({ label, value }) => (
+  <div className="flex items-baseline w-full text-[14px]">
+    <span className="text-gray-900">{label}</span>
+    <div className="flex-1 border-b-[2px] border-dotted border-black/30 mx-2 relative top-[-4px]"></div>
+    <span className="text-gray-900 font-medium">{value}</span>
+  </div>
+);

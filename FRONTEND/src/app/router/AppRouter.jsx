@@ -28,6 +28,7 @@ import { NotificationsPage } from '../../features/learners/pages/NotificationsPa
 import { WalletPage } from '../../features/learners/pages/WalletPage';
 import { AddPaymentMethodPage } from '../../features/learners/pages/AddPaymentMethodPage';
 import { HistoryPage } from '../../features/learners/pages/HistoryPage';
+import { AppointmentsPage } from '../../features/learners/pages/AppointmentsPage';
 
 export function AppRouter() {
   return (
@@ -116,6 +117,7 @@ export function AppRouter() {
                     <Route path="/portefeuille" element={<WalletPage />} />
                     <Route path="/portefeuille/nouveau" element={<AddPaymentMethodPage />} />
                     <Route path="/histoire" element={<HistoryPage />} />
+                    <Route path="/rdv" element={<AppointmentsPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

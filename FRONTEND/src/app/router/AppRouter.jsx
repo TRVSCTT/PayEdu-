@@ -27,6 +27,7 @@ import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecuri
 import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
 import { WalletPage } from '../../features/learners/pages/WalletPage';
 import { AddPaymentMethodPage } from '../../features/learners/pages/AddPaymentMethodPage';
+import { HistoryPage } from '../../features/learners/pages/HistoryPage';
 
 export function AppRouter() {
   return (
@@ -114,6 +115,7 @@ export function AppRouter() {
                     <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
                     <Route path="/portefeuille" element={<WalletPage />} />
                     <Route path="/portefeuille/nouveau" element={<AddPaymentMethodPage />} />
+                    <Route path="/histoire" element={<HistoryPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

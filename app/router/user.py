@@ -88,4 +88,7 @@ def configurer_totp(user: User = Depends(get_current_user)):
 
 @router.get("/me", response_model=UserOut)
 def profil(user: User = Depends(get_current_user)):
-    return user
+    user_out = UserOut.model_validate(user)
+    if user.etablissement:
+        user_out.etablissement_nom = user.etablissement.nom
+    return user_out

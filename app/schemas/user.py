@@ -87,4 +87,5 @@ class UserOut(BaseModel):
     prenom: str
     role: RoleUtilisateur
     etablissement_id: Optional[uuid.UUID] = None
+    etablissement_nom: Optional[str] = None
     est_actif: bool

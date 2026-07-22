@@ -9,14 +9,15 @@ Ce fichier suppose l'existence, ailleurs dans ton projet, de :
 
 import uuid
 from datetime import datetime
-from decimal import Decimal
+from decimal import Decimal  # noqa: F401
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import  func , select
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal  # noqa: F401
 from app.core.security import verifier_code_totp
+from app.models.objet_paiement import ObjetPaiement
 from app.models.payment import  Paiement, PaiementQRCode, StatutPaiement, TypeQRCode  #MoyenPaiement
 from app.schemas.payment import (
     PaiementAutorisation,
@@ -28,12 +29,6 @@ from app.schemas.payment import (
 from app.services.cinetpay import CinetPayError, get_cinetpay_client
 from app.services.qrcode_services import generer_contenus_qrcodes
 
-# À remplacer par une vraie table `tarifs` liée à l'établissement et à l'année académique.
-TARIFS: dict[str, Decimal] = {
-    "frais_inscription": Decimal("45000"),
-    "frais_pension": Decimal("150000"),
-    "frais_examen": Decimal("10000"),
-}
 
 
 def _recuperer_paiement(db: Session, paiement_id: uuid.UUID, apprenant_id: uuid.UUID) -> Paiement:
@@ -56,14 +51,20 @@ def _exiger_statut(paiement: Paiement, attendu: StatutPaiement) -> None:
 # --- Phase 2, formulaire 1 : sélection établissement / objet / moyen ---------
 
 def creer_brouillon(db: Session, apprenant_id: uuid.UUID, data: PaiementFormulaire1) -> Paiement:
-    montant = TARIFS.get(data.objet_paiement)
+    result = db.execute(
+        select(ObjetPaiement.montant).where(
+            ObjetPaiement.id == data.objet_paiement_id,
+            ObjetPaiement.etablissement_id == data.etablissement_id
+        )
+    )
+    montant = result.scalar_one_or_none()
     if montant is None:
         raise HTTPException(400, "Objet de paiement inconnu")
 
     paiement = Paiement(
         apprenant_id=apprenant_id,
         etablissement_id=data.etablissement_id,
-        objet_paiement=data.objet_paiement,
+        objet_paiement_id=data.objet_paiement_id,
         moyen_paiement=data.moyen_paiement,
         montant=montant,
         statut=StatutPaiement.BROUILLON,
@@ -148,6 +149,11 @@ def autoriser_paiement(
     if not verifier_code_totp(db,apprenant_id, data.code_totp):
         raise HTTPException(401, "Code de sécurité invalide ou expiré")
 
+    objet = (db.execute(
+        select(ObjetPaiement).where(ObjetPaiement.id==paiement.objet_paiement_id)
+    )).scalar_one_or_none()
+    libelle_objet = objet.libelle if objet else "Paiement PayEdu"
+
     infos = paiement.infos_confirmees or {}
     nom_complet = infos.get("nom", "Apprenant PayEdu").split(" ", 1)
     prenom_client = nom_complet[0]
@@ -159,7 +165,7 @@ def autoriser_paiement(
         resultat = client.initier_paiement(
             transaction_id=reference_transaction,
             montant=float(paiement.montant),
-            description=f"{paiement.objet_paiement} - {infos.get('matricule', '')}",
+            description=f"{libelle_objet} - {infos.get('matricule', '')}",
             numero_client=paiement.numero_compte_paiement,
             nom_client=nom_client,
             prenom_client=prenom_client,
@@ -246,6 +252,14 @@ def scanner_qrcode_caisse(db: Session, paiement_id: uuid.UUID, type_code: TypeQR
     db.refresh(qrcode_obj)
     return qrcode_obj
 
+def _generer_numero_recu(db:Session)-> str:
+    """Format PAY-{annee}-{compteur sur  chiffres} , ex: PAY-2026-OO42."""
+    annee = datetime.utcnow().year
+    compteur = db.query(func.count()).filter(
+        Paiement.numero_recu.like(f"PAY-{annee}-%")
+    ).scalar() + 1
+    return f"PAY-{annee}-{compteur:04d}"
+
 
 def finaliser_caisse(db: Session, paiement_id: uuid.UUID) -> Paiement:
     result = db.execute(select(Paiement).where(Paiement.id == paiement_id))
@@ -261,6 +275,7 @@ def finaliser_caisse(db: Session, paiement_id: uuid.UUID) -> Paiement:
 
     paiement.statut = StatutPaiement.ACQUITTEE
     paiement.acquitte_at = datetime.utcnow()
+    paiement.numero_recu = _generer_numero_recu(db)
     db.commit()
     db.refresh(paiement)
     return paiement

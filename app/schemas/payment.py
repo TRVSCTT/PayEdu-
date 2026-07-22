@@ -11,7 +11,7 @@ from app.models.payment import MoyenPaiement, StatutPaiement
 class PaiementFormulaire1(BaseModel):
     """Étape 1 : sélection établissement, objet et moyen de paiement + quitus (fichier séparé, voir endpoint)."""
     etablissement_id: uuid.UUID
-    objet_paiement: str = Field(..., max_length=100, examples=["frais_inscription"])
+    objet_paiement_id: uuid.UUID
     moyen_paiement: MoyenPaiement
 
 
@@ -46,7 +46,7 @@ class PaiementFormulaire3(BaseModel):
 class PaiementRecapitulatif(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
-    objet_paiement: str
+    objet_paiement_id: uuid.UUID
     montant: Decimal
     moyen_paiement: MoyenPaiement
     numero_compte_paiement: Optional[str] = None
@@ -68,9 +68,10 @@ class PaiementOut(BaseModel):
     id: uuid.UUID
     statut: StatutPaiement
     montant: Decimal
-    objet_paiement: str
+    objet_paiement_id: uuid.UUID
     moyen_paiement: Optional[MoyenPaiement] = None
     reference_transaction: Optional[str] = None
+    numero_recu: Optional[str] = None
     motif_echec: Optional[str] = None
     created_at: datetime
     updated_at: datetime

@@ -290,6 +290,28 @@ function renderSetup(){
       <div class="actions"><button onclick="doCreerCaisse()">Créer la caisse</button></div>
     </div>
 
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px">
+      <strong>5. Créer un objet de paiement</strong> (nécessite d'être connecté en établissement — étape 2)
+      <div class="row">
+        <div><label>Libellé</label><input id="s_objet_libelle" value="Frais d'inscription" /></div>
+        <div><label>Montant (FCFA)</label><input id="s_objet_montant" value="45000" /></div>
+      </div>
+      <div class="row">
+        <div><label>Échéance (AAAA-MM-JJ, optionnel)</label><input id="s_objet_echeance" value="2026-10-15" /></div>
+        <div><label>Phase (optionnel)</label><input id="s_objet_phase" value="INSCRIPTION" /></div>
+      </div>
+      <div class="actions"><button onclick="doCreerObjetPaiement()">Créer l'objet de paiement</button></div>
+      <div id="objetOut" class="hint"></div>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px">
+      <strong>6. Déposer un quitus</strong> (nécessite d'être connecté en établissement — étape 2, et un objet de paiement créé ci-dessus)
+      <label>ID de l'objet de paiement</label><input id="s_quitus_objet" placeholder="rempli automatiquement après le bloc 5" />
+      <label>ID de l'apprenant</label><input id="s_quitus_apprenant" placeholder="l'apprenant créé au bloc 3 (voir le log ci-dessous après création)" />
+      <label>URL du fichier (simulée pour la démo)</label><input id="s_quitus_url" value="https://payedu.cm/quitus/demo-21T00123.pdf" />
+      <div class="actions"><button onclick="doDeposerQuitus()">Déposer le quitus</button></div>
+    </div>
+
     <div class="hint" style="margin-top:20px">Une fois tes comptes créés, va à l'étape 01 · Connexion pour te connecter normalement avec l'apprenant (ou la caisse) et commencer le flux de paiement.</div>
   `;
 }
@@ -322,7 +344,7 @@ async function doCreerEtablissement(){
   document.getElementById('etabOut').textContent = `ID établissement : ${data.etablissement_id} (copié dans les champs ci-dessous)`;
 }
 async function doCreerApprenant(){
-  await appel('POST','/auth/register/apprenant',{
+  const data = await appel('POST','/auth/register/apprenant',{
     etablissement_id: document.getElementById('s_appr_etab').value,
     matricule: document.getElementById('s_appr_matricule').value,
     email: document.getElementById('s_appr_email').value || null,
@@ -331,6 +353,7 @@ async function doCreerApprenant(){
     nom: document.getElementById('s_appr_nom').value,
     prenom: document.getElementById('s_appr_prenom').value,
   });
+  document.getElementById('s_quitus_apprenant').value = data.id;
 }
 async function doCreerCaisse(){
   await appel('POST','/auth/register/caisse',{
@@ -339,6 +362,22 @@ async function doCreerCaisse(){
     mot_de_passe: document.getElementById('s_caisse_mdp').value,
     nom: document.getElementById('s_caisse_nom').value,
     prenom: document.getElementById('s_caisse_prenom').value,
+  });
+}
+async function doCreerObjetPaiement(){
+  const data = await appel('POST','/objets-paiement',{
+    libelle: document.getElementById('s_objet_libelle').value,
+    montant: Number(document.getElementById('s_objet_montant').value),
+    echeance: document.getElementById('s_objet_echeance').value || null,
+    phase: document.getElementById('s_objet_phase').value || null,
+  });
+  document.getElementById('s_quitus_objet').value = data.id;
+  document.getElementById('objetOut').textContent = `ID objet de paiement : ${data.id} (copié dans le bloc 6)`;
+}
+async function doDeposerQuitus(){
+  await appel('POST',`/objets-paiement/${document.getElementById('s_quitus_objet').value}/quitus`,{
+    apprenant_id: document.getElementById('s_quitus_apprenant').value,
+    url_fichier: document.getElementById('s_quitus_url').value,
   });
 }
 
@@ -378,23 +417,29 @@ function renderForm1(){
   const host = document.getElementById('panelHost');
   host.innerHTML = `
     <h2>02 · Formulaire 1 — Sélection du paiement</h2>
-    <p class="sub">POST /payments — établissement, objet, moyen de paiement.</p>
+    <p class="sub">POST /payments — établissement, objet du catalogue, moyen de paiement. Le quitus doit déjà avoir été déposé par l'établissement (voir étape 00, bloc 5).</p>
     <label>ID établissement (UUID)</label><input id="etab" placeholder="uuid de l'établissement" />
+    <div class="actions"><button class="secondary small" onclick="doChargerObjets()">Charger le catalogue de cet établissement</button></div>
     <label>Objet du paiement</label>
-    <select id="objet">
-      <option value="frais_inscription">frais_inscription</option>
-      <option value="frais_pension">frais_pension</option>
-      <option value="frais_examen">frais_examen</option>
-    </select>
+    <select id="objet"><option value="">— charge d'abord le catalogue ci-dessus —</option></select>
     <label>Moyen de paiement</label>
     <select id="moyen"><option value="orange_money">orange_money</option><option value="mtn_momo">mtn_momo</option><option value="carte_bancaire">carte_bancaire</option></select>
     <div class="actions"><button onclick="doForm1()">Créer le brouillon</button></div>
   `;
 }
+async function doChargerObjets(){
+  const data = await appel('GET','/objets-paiement');
+  const select = document.getElementById('objet');
+  if(!data.length){
+    select.innerHTML = '<option value="">Aucun objet de paiement pour cet établissement</option>';
+    return;
+  }
+  select.innerHTML = data.map(o => `<option value="${o.id}">${o.libelle} — ${o.montant} FCFA</option>`).join('');
+}
 async function doForm1(){
   const data = await appel('POST','/payments',{
     etablissement_id: document.getElementById('etab').value,
-    objet_paiement: document.getElementById('objet').value,
+    objet_paiement_id: document.getElementById('objet').value,
     moyen_paiement: document.getElementById('moyen').value,
   });
   state.paiementId = data.id;

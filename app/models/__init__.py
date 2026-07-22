@@ -1,5 +1,5 @@
 """Models subpackage for PayEdu."""
 
-from . import payment , user
+from . import payment , user , objet_paiement , quitus
 
-__all__ = ["payment", "user"]
+__all__ = ["payment", "user" , "objet_paiement" , "quitus"]

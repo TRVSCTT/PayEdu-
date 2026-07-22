@@ -91,16 +91,19 @@ export function SettingsPage() {
             
             <SettingRow 
               label="Assistant technique" 
+              onClick={() => navigate('/apprenant/parametres/assistant')}
               rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
             />
             
             <SettingRow 
               label="Demande de contrôle" 
+              onClick={() => navigate('/apprenant/parametres/controle')}
               rightElement={<ChevronRight className="w-4 h-4 text-black" strokeWidth={2} />} 
             />
             
             <SettingRow 
               label="A propos de l'application" 
+              onClick={() => navigate('/apprenant/parametres/apropos')}
               isLast 
             />
             

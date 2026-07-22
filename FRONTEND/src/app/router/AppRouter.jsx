@@ -33,6 +33,10 @@ import { ReceiptPage } from '../../features/learners/pages/ReceiptPage';
 import { DocumentsPage } from '../../features/learners/pages/DocumentsPage';
 import { SettingsPage } from '../../features/learners/pages/SettingsPage';
 import { SupportPage } from '../../features/learners/pages/SupportPage';
+import { AboutPage } from '../../features/learners/pages/AboutPage';
+import { ChatAssistantPage } from '../../features/learners/pages/ChatAssistantPage';
+import { VerificationRequestPage } from '../../features/learners/pages/VerificationRequestPage';
+import { ProfilePage } from '../../features/learners/pages/ProfilePage';
 
 export function AppRouter() {
   return (
@@ -126,6 +130,10 @@ export function AppRouter() {
                     <Route path="/documents" element={<DocumentsPage />} />
                     <Route path="/parametres" element={<SettingsPage />} />
                     <Route path="/parametres/support" element={<SupportPage />} />
+                    <Route path="/parametres/assistant" element={<ChatAssistantPage />} />
+                    <Route path="/parametres/controle" element={<VerificationRequestPage />} />
+                    <Route path="/parametres/apropos" element={<AboutPage />} />
+                    <Route path="/profil" element={<ProfilePage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

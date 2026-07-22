@@ -18,6 +18,7 @@ from app.schemas.user import (
     EtablissementCreate,
     LoginRequest,
     TokenResponse,
+    UserUpdate
 )
 
 
@@ -122,3 +123,18 @@ def authentifier(db: Session, data: LoginRequest) -> TokenResponse:
 
     token = creer_access_token(user.id, user.role)
     return TokenResponse(access_token=token, role=user.role)
+
+def modifier_profil(db: Session, user: User, data: UserUpdate) -> User:
+    if data.email is not None and data.email != user.email:
+        _verifier_unicite(db, email=data.email)
+        user.email = data.email
+    if data.telephone is not None:
+        user.telephone = data.telephone
+    if data.filiere is not None:
+        user.filiere = data.filiere
+    if data.niveau is not None:
+        user.niveau = data.niveau
+        
+    db.commit()
+    db.refresh(user)
+    return user

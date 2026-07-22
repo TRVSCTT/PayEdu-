@@ -56,7 +56,10 @@ export function SupportPage() {
 
         {/* Action Buttons */}
         <div className="space-y-3 mb-10">
-          <button className="w-full py-4 rounded-xl bg-black text-white text-[17px] font-medium hover:bg-gray-800 transition-colors">
+          <button 
+            onClick={() => navigate('/apprenant/parametres/assistant')}
+            className="w-full py-4 rounded-xl bg-black text-white text-[17px] font-medium hover:bg-gray-800 transition-colors"
+          >
             Contacter l'assistant
           </button>
           <button className="w-full py-4 rounded-xl border border-gray-900 bg-white text-black text-[17px] font-medium hover:bg-gray-50 transition-colors">

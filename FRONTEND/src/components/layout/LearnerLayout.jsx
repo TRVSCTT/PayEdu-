@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useLocation } from 'react-router-dom';
 import { Home, CreditCard, FileText, Settings, User, Bell } from 'lucide-react';
 import { useAuth } from '../../store/authStore';
 import { paymentService } from '../../services/paymentService';
@@ -28,10 +28,14 @@ export function LearnerLayout() {
     }
   }, [user]);
 
+  const location = useLocation();
+  const isProfilePage = location.pathname === '/apprenant/profil';
+
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col font-sans">
       {/* Top Header */}
-      <header className="bg-[#fafafa] px-6 py-4 flex justify-between items-center">
+      {!isProfilePage && (
+        <header className="bg-[#fafafa] px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
             {/* Generate avatar using UI Faces or an initial-based avatar */}
@@ -57,6 +61,7 @@ export function LearnerLayout() {
           )}
         </Link>
       </header>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto pb-24">

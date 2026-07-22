@@ -14,18 +14,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.core.database import SessionLocal
-from app.models.user import User , RoleUtilisateur
+from app.core.database import SessionLocal, get_db
+from app.models.user import User, RoleUtilisateur
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def generer_secret_totp() -> str:

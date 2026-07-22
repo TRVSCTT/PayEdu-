@@ -9,6 +9,11 @@ export const paymentService = {
     return response.data;
   },
 
+  modifierProfil: async (data) => {
+    const response = await apiClient.patch('/auth/me', data);
+    return response.data;
+  },
+
   /**
    * (Côté Apprenant) Historique des paiements
    */

@@ -31,6 +31,7 @@ from app.schemas.user import (
     TOTPSetupOut,
     TokenResponse,
     UserOut,
+    UserUpdate
 )
 from app.services import user_service
 
@@ -91,4 +92,16 @@ def profil(user: User = Depends(get_current_user)):
     user_out = UserOut.model_validate(user)
     if user.etablissement:
         user_out.etablissement_nom = user.etablissement.nom
+    return user_out
+
+@router.patch("/me", response_model=UserOut)
+def modifier_profil(
+    data: UserUpdate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    updated_user = user_service.modifier_profil(db, user, data)
+    user_out = UserOut.model_validate(updated_user)
+    if updated_user.etablissement:
+        user_out.etablissement_nom = updated_user.etablissement.nom
     return user_out

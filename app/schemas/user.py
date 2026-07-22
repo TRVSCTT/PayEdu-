@@ -76,7 +76,13 @@ class TOTPVerifyRequest(BaseModel):
     code_totp: str = Field(..., min_length=6, max_length=6)
 
 
-# --- Sortie ------------------------------------------------------------------------
+# --- Sortie et Mise à jour ----------------------------------------------------
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    telephone: Optional[str] = None
+    filiere: Optional[str] = None
+    niveau: Optional[str] = None
 
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -88,4 +94,7 @@ class UserOut(BaseModel):
     role: RoleUtilisateur
     etablissement_id: Optional[uuid.UUID] = None
     etablissement_nom: Optional[str] = None
+    telephone: Optional[str] = None
+    filiere: Optional[str] = None
+    niveau: Optional[str] = None
     est_actif: bool

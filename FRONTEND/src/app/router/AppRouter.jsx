@@ -30,6 +30,9 @@ import { AddPaymentMethodPage } from '../../features/learners/pages/AddPaymentMe
 import { HistoryPage } from '../../features/learners/pages/HistoryPage';
 import { AppointmentsPage } from '../../features/learners/pages/AppointmentsPage';
 import { ReceiptPage } from '../../features/learners/pages/ReceiptPage';
+import { DocumentsPage } from '../../features/learners/pages/DocumentsPage';
+import { SettingsPage } from '../../features/learners/pages/SettingsPage';
+import { SupportPage } from '../../features/learners/pages/SupportPage';
 
 export function AppRouter() {
   return (
@@ -120,6 +123,9 @@ export function AppRouter() {
                     <Route path="/histoire" element={<HistoryPage />} />
                     <Route path="/rdv" element={<AppointmentsPage />} />
                     <Route path="/recu" element={<ReceiptPage />} />
+                    <Route path="/documents" element={<DocumentsPage />} />
+                    <Route path="/parametres" element={<SettingsPage />} />
+                    <Route path="/parametres/support" element={<SupportPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

@@ -14,5 +14,10 @@ export const notificationService = {
   marquerToutLu: async () => {
     const response = await apiClient.patch('/notifications/marquer-tout-lu');
     return response.data;
+  },
+
+  creerNotificationTest: async () => {
+    const response = await apiClient.post('/notifications/test');
+    return response.data;
   }
 };

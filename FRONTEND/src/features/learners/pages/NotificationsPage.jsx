@@ -103,6 +103,22 @@ export function NotificationsPage() {
             <p className="text-gray-500">Aucune notification pour le moment.</p>
           </div>
         )}
+
+        {/* Bouton de test caché (pour débogage) */}
+        <div className="mt-8 flex justify-center">
+          <button 
+            onClick={async () => {
+              try {
+                await notificationService.creerNotificationTest();
+                const data = await notificationService.listerNotifications();
+                setNotifications(data || []);
+              } catch(e) { console.error(e); }
+            }}
+            className="px-4 py-2 bg-gray-100 text-gray-600 text-xs rounded-full hover:bg-gray-200"
+          >
+            + Ajouter une notification test
+          </button>
+        </div>
       </main>
     </div>
   );

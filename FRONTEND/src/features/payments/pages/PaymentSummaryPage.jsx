@@ -29,8 +29,7 @@ export function PaymentSummaryPage() {
         if (newPin.length === pinLength) {
           setTimeout(() => {
             setShowSecurityModal(false);
-            toast.success('Paiement initié avec succès !');
-            navigate('/apprenant');
+            navigate('/apprenant/paiements/succes');
           }, 500);
         }
       }

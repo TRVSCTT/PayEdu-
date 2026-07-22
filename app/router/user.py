@@ -105,3 +105,11 @@ def modifier_profil(
     if updated_user.etablissement:
         user_out.etablissement_nom = updated_user.etablissement.nom
     return user_out
+
+@router.delete("/me", status_code=204)
+def supprimer_compte(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user_service.supprimer_compte(db, user)
+    return None

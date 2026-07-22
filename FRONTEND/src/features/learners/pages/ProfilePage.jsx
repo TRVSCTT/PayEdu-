@@ -52,10 +52,16 @@ export function ProfilePage() {
     removeAuthenticationData();
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     const confirm = window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.");
     if (confirm) {
-      alert("Votre demande de suppression a été envoyée.");
+      try {
+        await paymentService.supprimerCompte();
+        removeAuthenticationData();
+      } catch (error) {
+        console.error("Erreur lors de la suppression", error);
+        alert("Une erreur est survenue lors de la suppression de votre compte.");
+      }
     }
   };
 

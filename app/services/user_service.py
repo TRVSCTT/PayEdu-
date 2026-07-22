@@ -138,3 +138,7 @@ def modifier_profil(db: Session, user: User, data: UserUpdate) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+def supprimer_compte(db: Session, user: User) -> None:
+    user.est_actif = False
+    db.commit()

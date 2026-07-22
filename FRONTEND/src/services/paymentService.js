@@ -14,6 +14,11 @@ export const paymentService = {
     return response.data;
   },
 
+  supprimerCompte: async () => {
+    const response = await apiClient.delete('/auth/me');
+    return response.data;
+  },
+
   /**
    * (Côté Apprenant) Historique des paiements
    */

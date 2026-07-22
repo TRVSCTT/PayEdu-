@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from app.core.database import engine, Base
 from app.core.config import settings  # noqa: F401
-from app.router import payment , user
+from app.router import payment , user, frais
 
 
 app = FastAPI(
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(payment.router)
 app.include_router(user.router)
+app.include_router(frais.router)
 
 @app.get('/')
 def root():

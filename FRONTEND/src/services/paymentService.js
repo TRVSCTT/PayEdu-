@@ -10,6 +10,14 @@ export const paymentService = {
   },
 
   /**
+   * (Côté Apprenant) Historique des paiements
+   */
+  obtenirHistorique: async () => {
+    const response = await apiClient.get('/payments/historique');
+    return response.data;
+  },
+
+  /**
    * Étape 1 : Créer le brouillon de paiement
    * @param {Object} data - { etablissement_id, objet_paiement, moyen_paiement }
    */

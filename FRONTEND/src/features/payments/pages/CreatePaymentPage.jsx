@@ -1,20 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { usePaymentContext } from './../context/PaymentContext';
-
-const FEES = [
-  { id: 'is', title: 'Inscription spéciale', date: '30 sept 2026', amount: 5000 },
-  { id: 'p1', title: 'Pension - Tranche 1', date: '30 sept 2026', amount: 350000 },
-  { id: 'p2', title: 'Pension - Tranche 2', date: '10 fev 2027', amount: 200000 },
-  { id: 'vm', title: 'Visite médicale', date: '30 sept 2026', amount: 5000 },
-  { id: 'ce', title: 'Carte étudiant', date: '30 sept 2026', amount: 5000 },
-];
+import { fraisService } from '../../../services/fraisService';
+import { paymentService } from '../../../services/paymentService';
 
 export function CreatePaymentPage() {
   const navigate = useNavigate();
   const { updatePaymentData } = usePaymentContext();
   const [selectedFees, setSelectedFees] = useState([]);
+  const [availableFees, setAvailableFees] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFees = async () => {
+      try {
+        const [fraisData, histData] = await Promise.all([
+          fraisService.listerFrais(),
+          paymentService.obtenirHistorique()
+        ]);
+        
+        // Filtrer les frais qui sont déjà payés ("acquittee")
+        const paiementsAcquittes = (histData || []).filter(p => p.statut === 'acquittee');
+        const unpaidFees = (fraisData || []).filter(f => !paiementsAcquittes.some(p => p.objet_paiement.includes(f.titre)));
+        
+        setAvailableFees(unpaidFees);
+      } catch (error) {
+        console.error("Erreur chargement des frais", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchFees();
+  }, []);
 
   const toggleFee = (id) => {
     setSelectedFees(prev => 
@@ -23,13 +41,13 @@ export function CreatePaymentPage() {
   };
 
   const totalAmount = selectedFees.reduce((sum, id) => {
-    const fee = FEES.find(f => f.id === id);
-    return sum + (fee ? fee.amount : 0);
+    const fee = availableFees.find(f => f.id === id);
+    return sum + (fee ? fee.montant : 0);
   }, 0);
 
   const handleContinue = () => {
     // Set the chosen fees in context
-    const objetPaiement = selectedFees.map(id => FEES.find(f => f.id === id)?.title).join(', ');
+    const objetPaiement = selectedFees.map(id => availableFees.find(f => f.id === id)?.titre).join(', ');
     updatePaymentData({
       objet_paiement: objetPaiement || 'Frais de scolarité',
       montant_total: totalAmount
@@ -68,26 +86,32 @@ export function CreatePaymentPage() {
 
         {/* Fees List */}
         <div className="space-y-3">
-          {FEES.map(fee => (
-            <div 
-              key={fee.id} 
-              onClick={() => toggleFee(fee.id)}
-              className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer hover:border-gray-300 transition-colors"
-            >
-              <div className="mr-4 flex-shrink-0">
-                <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${selectedFees.includes(fee.id) ? 'bg-black border-black' : 'border-gray-400 bg-white'}`}>
-                  {selectedFees.includes(fee.id) && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+          {isLoading ? (
+            <p className="text-center text-sm text-gray-500 py-4">Chargement des frais...</p>
+          ) : availableFees.length > 0 ? (
+            availableFees.map(fee => (
+              <div 
+                key={fee.id} 
+                onClick={() => toggleFee(fee.id)}
+                className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex items-center cursor-pointer hover:border-gray-300 transition-colors"
+              >
+                <div className="mr-4 flex-shrink-0">
+                  <div className={`w-6 h-6 rounded-md border flex items-center justify-center transition-colors ${selectedFees.includes(fee.id) ? 'bg-black border-black' : 'border-gray-400 bg-white'}`}>
+                    {selectedFees.includes(fee.id) && <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[15px] font-medium text-gray-900 leading-tight">{fee.titre}</h3>
+                  <p className="text-[12px] text-gray-500 mt-1">Échéance {new Date(fee.date_echeance).toLocaleDateString('fr-FR')}</p>
+                </div>
+                <div className="text-right flex-shrink-0 pl-2">
+                  <p className="text-[15px] font-medium text-gray-900">{fee.montant.toLocaleString('fr-FR')} FCFA</p>
                 </div>
               </div>
-              <div className="flex-1">
-                <h3 className="text-[15px] font-medium text-gray-900 leading-tight">{fee.title}</h3>
-                <p className="text-[12px] text-gray-500 mt-1">Échéance {fee.date}</p>
-              </div>
-              <div className="text-right flex-shrink-0 pl-2">
-                <p className="text-[15px] font-medium text-gray-900">{fee.amount.toLocaleString('fr-FR')} FCFA</p>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center text-sm text-gray-500 py-4">Vous n'avez aucun frais en attente de paiement.</p>
+          )}
         </div>
 
         {/* Bottom Section */}

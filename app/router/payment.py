@@ -106,6 +106,20 @@ def autoriser_paiement(
     return PaiementAutorisationOut(id=paiement.id, statut=paiement.statut, payment_url=payment_url)
 
 
+@router.get("/historique", response_model=list[PaiementOut])
+def historique_paiements(
+    db: Session = Depends(get_db),
+    apprenant=Depends(get_current_apprenant),
+):
+    """(Côté Apprenant) Historique de tous ses paiements."""
+    result = db.execute(
+        select(Paiement)
+        .where(Paiement.apprenant_id == apprenant.id)
+        .order_by(Paiement.created_at.desc())
+    )
+    return result.scalars().all()
+
+
 @router.get("/{paiement_id}", response_model=PaiementOut)
 def consulter_paiement(
     paiement_id: uuid.UUID,

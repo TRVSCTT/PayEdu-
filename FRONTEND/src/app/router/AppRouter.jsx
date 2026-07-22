@@ -26,6 +26,7 @@ import { PaymentDraftPage } from '../../features/payments/pages/PaymentDraftPage
 import { PaymentSecurityPage } from '../../features/payments/pages/PaymentSecurityPage';
 import { NotificationsPage } from '../../features/learners/pages/NotificationsPage';
 import { WalletPage } from '../../features/learners/pages/WalletPage';
+import { AddPaymentMethodPage } from '../../features/learners/pages/AddPaymentMethodPage';
 
 export function AppRouter() {
   return (
@@ -112,6 +113,7 @@ export function AppRouter() {
                     <Route path="/paiements/rendez-vous" element={<AppointmentScheduledPage />} />
                     <Route path="/paiements/brouillon/:paymentId" element={<PaymentDraftPage />} />
                     <Route path="/portefeuille" element={<WalletPage />} />
+                    <Route path="/portefeuille/nouveau" element={<AddPaymentMethodPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

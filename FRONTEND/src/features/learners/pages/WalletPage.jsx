@@ -38,7 +38,10 @@ export function WalletPage() {
 
         {/* Add button */}
         <div className="mt-8 flex justify-end pr-2">
-          <button className="text-[15px] font-medium text-gray-900 hover:text-gray-600 transition-colors flex items-center gap-1">
+          <button 
+            onClick={() => navigate('/apprenant/portefeuille/nouveau')}
+            className="text-[15px] font-medium text-gray-900 hover:text-gray-600 transition-colors flex items-center gap-1"
+          >
             <span>+ Ajouter</span>
           </button>
         </div>

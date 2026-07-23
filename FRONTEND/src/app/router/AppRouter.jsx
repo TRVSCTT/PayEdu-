@@ -26,6 +26,7 @@ import { ActeurPaiementPage } from '../../features/caisse/pages/ActeurPaiementPa
 import { AgendaPage } from '../../features/caisse/pages/AgendaPage'
 import { RapportsPage } from '../../features/caisse/pages/RapportsPage'
 import { GestionEtablissementPage } from '../../features/caisse/pages/GestionEtablissementPage'
+import { MessageriePage } from '../../features/caisse/pages/MessageriePage'
 import { ParametresCaissePage } from '../../features/caisse/pages/ParametresCaissePage'
 import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearnerPage'
 import { LearnerDashboard } from '../../features/learners/pages/LearnerDashboard'
@@ -175,7 +176,7 @@ export function AppRouter() {
                   <Route path="/rapports" element={<RapportsPage />} />
                   <Route path="/etablissement" element={<GestionEtablissementPage />} />
                   <Route path="/parametres" element={<ParametresCaissePage />} />
-                  <Route path="/messagerie" element={<AdminSupportPage />} />
+                  <Route path="/messagerie" element={<MessageriePage />} />
                   <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>

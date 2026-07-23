@@ -38,6 +38,7 @@ export function AboutPage() {
       <div className="text-center text-xs text-text-muted">
         <p>© 2026 PayEdu. Tous droits réservés.</p>
         <p className="mt-1">Conçu pour le Cameroun et l’écosystème académique.</p>
+        <p className="mt-2 font-medium text-text-secondary">Fait par (ONOBIONO ELOGO dave yohan)</p>
       </div>
     </div>
   )

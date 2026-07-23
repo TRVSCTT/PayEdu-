@@ -1,13 +1,48 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, RefreshCw, Loader2, X } from 'lucide-react';
 import { cardStyles, buttonStyles, cx } from '../../../components/ui/designSystem';
 import { caisseService } from '../../../services/caisseService';
+import { formatMoney, formatDate } from '../../../utils/formatters';
+import { toast } from 'sonner';
 
 export function AgendaPage() {
   const navigate = useNavigate();
   const [selectedPaiement, setSelectedPaiement] = useState(null);
+
+  // Filtres
+  const [filterFile, setFilterFile] = useState('Tous');
+  const [filterHeure, setFilterHeure] = useState('Toutes');
+  const [filterDate, setFilterDate] = useState('Toutes');
+  const [filterMois, setFilterMois] = useState('Mois');
+  const [filterEtab, setFilterEtab] = useState('Tous');
+  const [filterPhase, setFilterPhase] = useState('1');
+
+  // Modals et Menus
+  const [showRepousserMenu, setShowRepousserMenu] = useState(false);
+  const [showAjustementModal, setShowAjustementModal] = useState(false);
+  const [ajustementValue, setAjustementValue] = useState(400);
+
+  const handleResetFilters = () => {
+    setFilterFile('Tous');
+    setFilterHeure('Toutes');
+    setFilterDate('Toutes');
+    setFilterMois('Mois');
+    setFilterEtab('Tous');
+    setFilterPhase('1');
+    toast.success('Filtres réinitialisés');
+  };
+
+  const handleRepousser = (delai) => {
+    toast.success(`Les rendez-vous ont été repoussés de ${delai}`);
+    setShowRepousserMenu(false);
+  };
+
+  const handleSaveAjustement = () => {
+    toast.success('Paramètres d\'ajustement enregistrés');
+    setShowAjustementModal(false);
+  };
 
   const { data: queue = [], isLoading } = useQuery({
     queryKey: ['caisse-queue'],
@@ -73,12 +108,30 @@ export function AgendaPage() {
           </button>
           <h1 className="text-3xl font-bold text-text">RDV / Agenda</h1>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 relative">
           <span className="text-sm font-semibold text-text hover:underline cursor-pointer">Voir les statistiques du jour</span>
-          <button className={cx(buttonStyles({ variant: 'secondary' }), 'bg-white border-border hover:bg-gray-50 flex items-center gap-2')}>
-            Repousser tous les rdv <ChevronDown className="w-4 h-4" />
-          </button>
-          <button className={cx(buttonStyles({ variant: 'primary' }), 'bg-black text-white hover:bg-black/90')}>
+          
+          <div className="relative">
+            <button 
+              onClick={() => setShowRepousserMenu(!showRepousserMenu)}
+              className={cx(buttonStyles({ variant: 'secondary' }), 'bg-white border-border hover:bg-gray-50 flex items-center gap-2')}
+            >
+              Repousser tous les rdv <ChevronDown className="w-4 h-4" />
+            </button>
+            
+            {showRepousserMenu && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-border rounded-xl shadow-lg py-2 z-20">
+                <button onClick={() => handleRepousser('1 jour')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">De 1 jour</button>
+                <button onClick={() => handleRepousser('2 jours')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">De 2 jours</button>
+                <button onClick={() => handleRepousser('1 semaine')} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors">De 1 semaine</button>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={() => setShowAjustementModal(true)}
+            className={cx(buttonStyles({ variant: 'primary' }), 'bg-black text-white hover:bg-black/90')}
+          >
             Ajustement
           </button>
         </div>
@@ -100,19 +153,19 @@ export function AgendaPage() {
         <div className="flex-1">
           <div className="flex justify-between items-center text-sm mb-2">
             <span className="font-semibold text-text">Filtre</span>
-            <button className="text-text-muted hover:text-text transition-colors flex items-center gap-1 text-xs">
+            <button onClick={handleResetFilters} className="text-text-muted hover:text-text transition-colors flex items-center gap-1 text-xs">
               <RefreshCw className="w-3 h-3" /> Réinitialiser
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <SelectFilter label="File" options={['Tous']} />
-            <SelectFilter label="Heure" options={['Toutes']} />
+            <SelectFilter label="File" options={['Tous', 'N°1']} value={filterFile} onChange={setFilterFile} />
+            <SelectFilter label="Heure" options={['Toutes', 'Matin', 'Après-midi']} value={filterHeure} onChange={setFilterHeure} />
             <div className="flex gap-2 col-span-2">
-              <SelectFilter label="Date" options={['Toutes']} className="flex-1" />
-              <SelectFilter label="Mois" options={['Mois']} className="w-24" />
+              <SelectFilter label="Date" options={['Toutes', 'Aujourd\'hui']} className="flex-1" value={filterDate} onChange={setFilterDate} />
+              <SelectFilter label="Mois" options={['Mois', 'Juillet', 'Août']} className="w-24" value={filterMois} onChange={setFilterMois} />
             </div>
-            <SelectFilter label="Etablissement" options={['Tous']} />
-            <SelectFilter label="Phase" options={['1']} />
+            <SelectFilter label="Etablissement" options={['Tous', 'IUT Douala']} value={filterEtab} onChange={setFilterEtab} />
+            <SelectFilter label="Phase" options={['1', '2', '3']} value={filterPhase} onChange={setFilterPhase} />
           </div>
         </div>
       </div>
@@ -236,6 +289,55 @@ export function AgendaPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Ajustement */}
+      {showAjustementModal && (
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl shadow-xl border border-border p-8 w-full max-w-md relative">
+            <button onClick={() => setShowAjustementModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold text-text mb-2">Ajustement de l'agenda</h3>
+            <p className="text-sm text-text-secondary mb-6">Modifiez les paramètres globaux de réception pour la caisse.</p>
+            
+            <div className="space-y-4 mb-8">
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">Nombre max de passages par créneau</label>
+                <input 
+                  type="number" 
+                  value={ajustementValue}
+                  onChange={(e) => setAjustementValue(e.target.value)}
+                  className="app-input w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">Créneaux horaires actifs</label>
+                <div className="flex gap-2 mt-2">
+                  <span className="px-3 py-1 bg-black text-white text-xs rounded-full">09:00</span>
+                  <span className="px-3 py-1 bg-black text-white text-xs rounded-full">11:00</span>
+                  <span className="px-3 py-1 bg-black text-white text-xs rounded-full">13:00</span>
+                  <span className="px-3 py-1 bg-black text-white text-xs rounded-full">16:00</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowAjustementModal(false)}
+                className={cx(buttonStyles({ variant: 'secondary' }), 'flex-1 bg-white border-border')}
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={handleSaveAjustement}
+                className={cx(buttonStyles({ variant: 'primary' }), 'flex-1 bg-black text-white hover:bg-black/90')}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

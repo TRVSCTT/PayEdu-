@@ -4,7 +4,7 @@ import { Settings2, Loader2, Plus } from 'lucide-react';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { etablissementService } from '../../../services/etablissementService';
 import { cardStyles, PageHeader, buttonStyles } from '../../../components/ui/designSystem';
-import { formatCurrency, formatDate } from '../../../utils/formatters';
+import { formatMoney, formatDate } from '../../../utils/formatters';
 
 export function FeesManagementPage() {
   const { data: frais, isLoading } = useQuery({
@@ -59,7 +59,7 @@ export function FeesManagementPage() {
                       {item.titre}
                       <div className="text-xs text-gray-400 font-normal">Niveau: {item.niveau_cible || 'Tous'}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-gray-900">{formatCurrency(item.montant)}</td>
+                    <td className="py-3 px-4 text-sm font-bold text-gray-900">{formatMoney(item.montant)}</td>
                     <td className="py-3 px-4 text-sm text-gray-600">
                       {item.autoriser_paiement_partiel ? 'Oui' : 'Non'}
                     </td>

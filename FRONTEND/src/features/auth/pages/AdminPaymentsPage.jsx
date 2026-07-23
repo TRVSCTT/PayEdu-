@@ -4,7 +4,7 @@ import { WalletCards, Loader2, Search } from 'lucide-react';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { adminService } from '../../../services/adminService';
 import { cardStyles, PageHeader } from '../../../components/ui/designSystem';
-import { formatCurrency, formatDate } from '../../../utils/formatters';
+import { formatMoney, formatDate } from '../../../utils/formatters';
 
 export function AdminPaymentsPage() {
   const { data: paiements, isLoading } = useQuery({
@@ -76,7 +76,7 @@ export function AdminPaymentsPage() {
                       {paiement.objet_libelle || 'Paiement'}
                       <div className="text-xs text-gray-400 font-medium">Pour: {paiement.etudiant_nom_complet || '-'}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-gray-900">{formatCurrency(paiement.montant)}</td>
+                    <td className="py-3 px-4 text-sm font-bold text-gray-900">{formatMoney(paiement.montant)}</td>
                     <td className="py-3 px-4">
                       {getStatusBadge(paiement.statut)}
                     </td>

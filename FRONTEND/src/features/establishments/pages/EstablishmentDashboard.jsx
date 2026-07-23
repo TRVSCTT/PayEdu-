@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DashboardLayout } from '../../../components/layout/DashboardLayout'
 import { PageHeader, StatCard, cardStyles, buttonStyles } from '../../../components/ui/designSystem'
 import { etablissementService } from '../../../services/etablissementService'
-import { formatCurrency } from '../../../utils/formatters'
+import { formatMoney } from '../../../utils/formatters'
 
 export function EstablishmentDashboard() {
   const { data: stats, isLoading } = useQuery({
@@ -43,7 +43,7 @@ export function EstablishmentDashboard() {
           <StatCard 
             icon={WalletCards} 
             label="Fonds Encaissés" 
-            value={formatCurrency(stats?.total_paiements_encaisses || 0)} 
+            value={formatMoney(stats?.total_paiements_encaisses || 0)} 
             helper={`${stats?.nombre_paiements_du_jour || 0} paiements aujourd'hui`} 
             tone="primary" 
           />

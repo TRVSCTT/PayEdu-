@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DashboardLayout } from '../../../components/layout/DashboardLayout'
 import { PageHeader, StatCard, cardStyles, buttonStyles } from '../../../components/ui/designSystem'
 import { adminService } from '../../../services/adminService'
-import { formatCurrency } from '../../../utils/formatters'
+import { formatMoney } from '../../../utils/formatters'
 
 export function AdminDashboard() {
   const { data: stats, isLoading } = useQuery({
@@ -32,7 +32,7 @@ export function AdminDashboard() {
           <StatCard 
             icon={CreditCard} 
             label="Volume Financier" 
-            value={formatCurrency(stats?.total_volume_financier || 0)} 
+            value={formatMoney(stats?.total_volume_financier || 0)} 
             helper="Montant total traité sur PayEdu" 
             tone="primary" 
           />

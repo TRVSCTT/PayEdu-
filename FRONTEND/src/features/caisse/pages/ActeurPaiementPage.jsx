@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
 import { cardStyles, buttonStyles, cx } from '../../../components/ui/designSystem';
 import { caisseService } from '../../../services/caisseService';
 import { formatMoney, formatDate } from '../../../utils/formatters';
 
 export function ActeurPaiementPage() {
+  const navigate = useNavigate();
   const [selectedPaiement, setSelectedPaiement] = useState(null);
 
   const { data: queue = [], isLoading } = useQuery({
@@ -16,7 +18,12 @@ export function ActeurPaiementPage() {
   return (
     <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-text">Acteur paiement</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors" title="Retour">
+            <ArrowLeft className="w-6 h-6 text-text" />
+          </button>
+          <h1 className="text-3xl font-bold text-text">Acteur paiement</h1>
+        </div>
         <div className="flex items-center gap-4">
           <button className={cx(buttonStyles({ variant: 'secondary' }), 'bg-white border-border hover:bg-gray-50')}>
             Historique

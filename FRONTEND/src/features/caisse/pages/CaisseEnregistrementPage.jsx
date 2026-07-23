@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Download, RefreshCw, Loader2, QrCode, X } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Loader2, QrCode, X } from 'lucide-react';
 import { cardStyles, buttonStyles, cx } from '../../../components/ui/designSystem';
 import { caisseService } from '../../../services/caisseService';
 import { formatMoney, formatDate } from '../../../utils/formatters';
 import { toast } from 'sonner';
 
 export function CaisseEnregistrementPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [filterStatut, setFilterStatut] = useState('En attente');
   const [selectedPaiement, setSelectedPaiement] = useState(null);
@@ -57,7 +59,12 @@ export function CaisseEnregistrementPage() {
   return (
     <div className="space-y-6 h-[calc(100vh-140px)] flex flex-col">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-text">Enregistrement</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors" title="Retour">
+            <ArrowLeft className="w-5 h-5 text-text" />
+          </button>
+          <h1 className="text-2xl font-bold text-text">Enregistrement</h1>
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-sm font-semibold text-text">Signalement en attente: 0</span>
           <button className={cx(buttonStyles({ variant: 'primary' }), 'bg-black text-white hover:bg-black/90')}>

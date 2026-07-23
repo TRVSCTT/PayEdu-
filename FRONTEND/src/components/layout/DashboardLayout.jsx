@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LogOut, School, UserPlus, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, School, UserPlus, UserRound, Moon, Sun } from 'lucide-react'
 import { USER_ROLES } from '../../constants/roles'
 import { useAuth } from '../../store/authStore'
+import { useTheme } from '../../store/themeStore'
 import { BrandLink, PageHeader, buttonStyles, cx } from '../ui/designSystem'
 
 const MENU_BY_ROLE = {
@@ -20,6 +21,7 @@ const MENU_BY_ROLE = {
 
 export function DashboardLayout({ title, description, actions, children }) {
   const { user, removeAuthenticationData } = useAuth()
+  const { isDarkMode, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const menuItems = MENU_BY_ROLE[user?.role] || []
 
@@ -98,6 +100,13 @@ export function DashboardLayout({ title, description, actions, children }) {
                 <p className="text-sm text-text-secondary">Espaces administratifs et partenaires financiers</p>
               </div>
               <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleTheme}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-surface text-text-secondary transition hover:bg-gray-100 hover:text-text"
+                  aria-label={isDarkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
+                >
+                  {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
                 <span className="app-chip">{user?.role || 'Espace connecté'}</span>
                 <button onClick={handleLogout} className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
                   <LogOut className="h-4 w-4" />
@@ -107,6 +116,12 @@ export function DashboardLayout({ title, description, actions, children }) {
             </div>
 
             <div className="flex items-center gap-2 lg:hidden">
+              <button
+                onClick={toggleTheme}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-surface text-text-secondary transition hover:bg-gray-100 hover:text-text"
+              >
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
               <button onClick={handleLogout} className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
                 <LogOut className="h-4 w-4" />
               </button>

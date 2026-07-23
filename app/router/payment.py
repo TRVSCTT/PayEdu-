@@ -23,13 +23,16 @@ Dépendances supposées déjà existantes ailleurs dans le projet :
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.orm import  Session
 
 from app.core.dependencies import get_current_apprenant, get_current_caisse
 from app.core.database import get_db
+from app.models.objet_paiement import ObjetPaiement
 from app.models.payment import Paiement, StatutPaiement, TypeQRCode
+from app.models.user import Etablissement
 from app.schemas.payment import (
     PaiementAutorisation,
     PaiementAutorisationOut,
@@ -41,6 +44,8 @@ from app.schemas.payment import (
     PaiementRecapitulatif,
 )
 from app.services import payment_service
+from app.services.recu_service import generer_recu_pdf
+
 
 router = APIRouter(prefix="/payments", tags=["paiements"])
 
@@ -136,6 +141,53 @@ def consulter_paiement(
         from fastapi import HTTPException
         raise HTTPException(404, "Paiement introuvable")
     return paiement
+
+@router.get('/{paiement_id}/recu')
+def telecharger_recu(
+    paiement_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    apprenant=Depends(get_current_apprenant),
+):
+    """Télécharge le reçu PDF du paiement (si statut == acquittee)."""
+    result = db.execute(
+        select(Paiement).where(Paiement.id == paiement_id, Paiement.apprenant_id == apprenant.id)
+    )
+    paiement = result.scalar_one_or_none()
+    if paiement is None:
+        raise HTTPException(404, "Paiement introuvable")
+    if paiement.statut != StatutPaiement.ACQUITTEE:
+        raise HTTPException(400, "Le paiement n'est pas encore acquitté, le reçu n'est pas disponible")
+    
+    objet = (db.execute(
+        select(ObjetPaiement).where(ObjetPaiement.id == paiement.objet_paiement_id)
+    )).scalar_one_or_none()
+
+    etablissement = (db.execute(
+        select(Etablissement).where(Etablissement.id == paiement.etablissement_id)
+    )).scalar_one_or_none()
+
+    infos = paiement.infos_confirmees or {}
+    pdf_bytes = generer_recu_pdf(
+        paiement_id=str(paiement.id),
+        numero_recu=paiement.numero_recu or "N/A",
+        reference_transaction=paiement.reference_transaction or "N/A",
+        etablissement_nom=etablissement.nom if etablissement else "Etablissement",
+        etablissement_sigle=etablissement.code if etablissement else "ETU",
+        apprenant_nom=infos.get("nom", "Apprenant"),
+        apprenant_matricule=infos.get("matricule", ""),
+        apprenant_filiere=infos.get("filiere", ""),
+        apprenant_niveau=infos.get("niveau", ""),
+        objet_libelle=objet.libelle if objet else "Paiement",
+        montant=paiement.montant,
+        moyen_paiement=paiement.moyen_paiement.value if paiement.moyen_paiement else "",
+        acquitte_le=paiement.acquitte_at,
+
+    )
+    return StreamingResponse(
+        iter([pdf_bytes]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=recu_{paiement.id}.pdf"},
+    )
 
 
 # --- Webhook CinetPay ---------------------------------------------------------

@@ -49,7 +49,7 @@ class Paiement(Base):
     apprenant_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     etablissement_id = Column(UUID(as_uuid=True), ForeignKey("etablissements.id"), nullable=False, index=True)
 
-    objet_paiement = Column(String(100), nullable=False)
+    objet_paiement_id = Column(UUID(as_uuid=True), ForeignKey("objets_paiement.id"), nullable=False)
     montant = Column(Numeric(12, 2), nullable=False)
     moyen_paiement = Column(SAEnum(MoyenPaiement,values_callable=lambda enum_cls: [e.value for e in enum_cls]), nullable=True)
     numero_compte_paiement = Column(String(20), nullable=True)
@@ -59,8 +59,10 @@ class Paiement(Base):
     ville_paiement=Column(String(100),nullable=True)
     code_postal_paiement=Column(String(20),nullable=True)
 
+    quitus_id = Column(UUID(as_uuid=True), ForeignKey("quitus.id"), nullable = True)
 
-    quitus_file_path = Column(String(255), nullable=True)
+
+
     infos_extraites = Column(JSON, nullable=True)   # Sortie OCR brute
     infos_confirmees = Column(JSON, nullable=True)   # Après validation par l'apprenant
 
@@ -69,6 +71,7 @@ class Paiement(Base):
     reference_transaction = Column(String(64), unique=True, nullable=True)  # Générée par PayEdu
     reference_operateur = Column(String(64), nullable=True, index=True)      # Retournée par Orange/MTN
     motif_echec = Column(Text, nullable=True)
+    numero_recu = Column(String(64), nullable=True, unique=True)  # Générée par PayEdu après validation caisse
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

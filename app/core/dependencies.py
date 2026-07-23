@@ -8,7 +8,7 @@ import pyotp
 
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials ,HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session 
 from sqlalchemy import select
@@ -17,7 +17,7 @@ from app.core.config import settings
 from app.core.database import SessionLocal, get_db
 from app.models.user import User, RoleUtilisateur
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+bearer_scheme = HTTPBearer()
 
 
 def generer_secret_totp() -> str:
@@ -44,7 +44,7 @@ def verifier_code_totp(db: Session, user_id: uuid.UUID, code: str) -> bool:
     return pyotp.TOTP(user.totp_secret).verify(code, valid_window=1)
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ):
     credentials_exception = HTTPException(
@@ -52,6 +52,7 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    token = credentials.credentials
 
     try:
         payload = jwt.decode(

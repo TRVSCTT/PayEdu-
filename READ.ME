@@ -1,0 +1,46 @@
+PayEdu (ETUTRANSFERT) — Documentation
+Backend
+Destinée au développeur frontend : ce document décrit tout ce qui est implémenté côté
+backend à ce jour, pour que le développement du frontend reste en accord avec l’API
+réelle. À mettre à jour à chaque évolution du backend.
+Stack : FastAPI (Python, synchrone) + PostgreSQL + SQLAlchemy + Alembic Architecture :
+monolithe modulaire (voir note en bas de document sur la décision d’architecture)
+1. Vue d’ensemble
+Le backend couvre actuellement deux domaines fonctionnels :
+1. Authentification — 4 rôles (Admin, Établissement, Apprenant, Caisse), JWT, TOTP
+2. Paiement — catalogue de frais, quitus, paiement via CinetPay (Mobile Money + Carte),
+validation caisse par QR codes, reçu PDF
+Tout est servi par une seule application FastAPI, sous un préfixe commun (à adapter selon
+ta config, ex. http://localhost:8000 ).
+2. Authentification
+2.1 Les 4 rôles
+Rôle Valeur ( role dans le JWT) Se connecte avec
+Admin admin email
+Établissement etablissement email
+Apprenant apprenant matricule ou email
+Caisse caisse email
+Hiérarchie de création : Admin → crée les Établissements → crée les Apprenants et
+Caisses de son établissement. Un apprenant/une caisse ne peut pas s’auto-inscrire ; c’est
+l’établissement qui crée ces comptes.
+2.2 Endpoints
+Méthode Route Rôle requis Description
+POST /auth/register/admin public
+Crée un admin (à
+restreindre en
+production)
+POST /auth/register/etablissement admin
+Crée un établissement
++ son compte
+gestionnaire
+POST /auth/register/apprenant etablissement Crée un compte
+apprenant
+POST /auth/register/caisse etablissement Crée un compte caisse
+POST /auth/login public
+Connexion → renvoie le
+JWT
+GET /auth/totp/setup authentifié
+Renvoie le QR code
+TOTP à scanner (une
+fois)
+GET /auth/me authentifié Profil de l’utilisateur
+connect

@@ -10,6 +10,8 @@ import { RoleRoute } from './RoleRoute'
 import { LoginPage } from '../../features/auth/pages/LoginPage'
 import { RegisterAdminPage } from '../../features/auth/pages/RegisterAdminPage'
 import { AdminDashboard } from '../../features/auth/pages/AdminDashboard'
+import { EstablishmentListPage } from '../../features/auth/pages/EstablishmentListPage'
+import { AdminPaymentsPage } from '../../features/auth/pages/AdminPaymentsPage'
 import { RegisterEstablishmentPage } from '../../features/establishments/pages/RegisterEstablishmentPage'
 import { EstablishmentDashboard } from '../../features/establishments/pages/EstablishmentDashboard'
 import { StudentListPage } from '../../features/establishments/pages/StudentListPage'
@@ -83,6 +85,8 @@ export function AppRouter() {
               <RoleRoute allowedRoles={[USER_ROLES.ADMIN]}>
                 <Routes>
                   <Route path="/" element={<AdminDashboard />} />
+                  <Route path="/etablissements" element={<EstablishmentListPage />} />
+                  <Route path="/paiements" element={<AdminPaymentsPage />} />
                   <Route path="/etablissements/nouveau" element={<RegisterEstablishmentPage />} />
                 </Routes>
               </RoleRoute>

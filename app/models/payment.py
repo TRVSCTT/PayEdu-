@@ -77,6 +77,9 @@ class Paiement(Base):
 
     qr_codes = relationship("PaiementQRCode", back_populates="paiement", cascade="all, delete-orphan")
 
+    apprenant = relationship("User", foreign_keys=[apprenant_id])
+    etablissement = relationship("Etablissement")
+
 
 class PaiementQRCode(Base):
     __tablename__ = "paiement_qrcodes"

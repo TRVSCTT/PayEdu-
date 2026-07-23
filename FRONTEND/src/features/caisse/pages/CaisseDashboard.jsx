@@ -141,11 +141,9 @@ export function CaisseDashboard() {
                   <span className="text-xs font-semibold text-text">Nbre étudiants</span>
                 </div>
                 <div className="divide-y divide-border">
-                  <ListItem name="IUT de Douala" count="9 000" />
-                  <ListItem name="Université de Yde I" count="8 000" />
-                  <ListItem name="ENSP Yaoundé" count="8 500" />
-                  <ListItem name="Université de Dschang" count="2 500" />
-                  <ListItem name="ESSEC Douala" count="7 000" />
+                  {chartData.map((etab, i) => (
+                    <ListItem key={i} name={etab.name} count="Actif" />
+                  ))}
                 </div>
               </div>
 
@@ -156,11 +154,9 @@ export function CaisseDashboard() {
                   <p className="text-xs text-text-muted">Ce mois</p>
                 </div>
                 <div className="space-y-4">
-                  <ProgressItem name="IUT de Douala" percent={85} />
-                  <ProgressItem name="Université de Yde I" percent={40} />
-                  <ProgressItem name="ENSP Yaoundé" percent={60} />
-                  <ProgressItem name="Université de Dschang" percent={15} />
-                  <ProgressItem name="ESSEC Douala" percent={75} />
+                  {chartData.map((etab, i) => (
+                    <ProgressItem key={i} name={etab.name} percent={etab.pv > 0 ? 100 : 0} />
+                  ))}
                 </div>
               </div>
 

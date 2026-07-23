@@ -67,6 +67,7 @@ def creer_caisse(
     db: Session = Depends(get_db),
     etablissement: User = Depends(get_current_etablissement),
 ):
+    data.etablissement_id = etablissement.etablissement_id
     return  user_service.creer_caisse(db, data)
 
 

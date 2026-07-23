@@ -37,6 +37,7 @@ from app.schemas.payment import (
     PaiementFormulaire2Confirmation,
     PaiementFormulaire3,
     PaiementOut,
+    PaiementCaisseOut,
     PaiementRecapitulatif,
 )
 from app.services import payment_service
@@ -160,18 +161,29 @@ def webhook_cinetpay(
 
 # --- Côté caisse ---------------------------------------------------------------
 
-@router.get("/caisse/queue", response_model=list[PaiementOut])
+@router.get("/caisse/queue", response_model=list[PaiementCaisseOut])
 def file_attente_caisse(
     db: Session = Depends(get_db),
     caisse=Depends(get_current_caisse),
 ):
+    from sqlalchemy.orm import joinedload
     result = db.execute(
-        select(Paiement).where(
+        select(Paiement)
+        .options(joinedload(Paiement.apprenant), joinedload(Paiement.etablissement))
+        .where(
             Paiement.etablissement_id == caisse.etablissement_id,
             Paiement.statut == StatutPaiement.EN_FILE_CAISSE,
         )
     )
-    return result.scalars().all()
+    paiements = result.scalars().all()
+    out = []
+    for p in paiements:
+        p_dict = {c.name: getattr(p, c.name) for c in p.__table__.columns}
+        p_dict["apprenant_nom"] = p.apprenant.nom if p.apprenant else None
+        p_dict["apprenant_prenom"] = p.apprenant.prenom if p.apprenant else None
+        p_dict["etablissement_nom"] = p.etablissement.nom if p.etablissement else None
+        out.append(PaiementCaisseOut(**p_dict))
+    return out
 
 
 @router.post("/caisse/{paiement_id}/scan/{type_code}")
@@ -207,13 +219,13 @@ def stats_caisse(
     # Validés aujourd'hui (simplifié, compte tous les terminés pour le moment)
     valides = db.query(func.count(Paiement.id)).filter(
         Paiement.etablissement_id == caisse.etablissement_id,
-        Paiement.statut == StatutPaiement.TERMINE
+        Paiement.statut == StatutPaiement.ACQUITTEE
     ).scalar() or 0
 
     # Total encaissé
     total_encaisse = db.query(func.sum(Paiement.montant)).filter(
         Paiement.etablissement_id == caisse.etablissement_id,
-        Paiement.statut == StatutPaiement.TERMINE
+        Paiement.statut == StatutPaiement.ACQUITTEE
     ).scalar() or 0
 
     return {
@@ -222,6 +234,6 @@ def stats_caisse(
         "total_encaisse": total_encaisse,
         "distribution_jour": 0, # Placeholder
         "volume_par_etablissement": [
-            { "name": "IUT Douala", "pv": total_encaisse if total_encaisse > 0 else 10000000 },
+            { "name": caisse.etablissement.nom if caisse.etablissement else "Mon Établissement", "pv": total_encaisse if total_encaisse > 0 else 0 },
         ]
     }

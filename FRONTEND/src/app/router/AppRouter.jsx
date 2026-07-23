@@ -148,7 +148,7 @@ export function AppRouter() {
                     <Route path="/parametres/controle" element={<VerificationRequestPage />} />
                     <Route path="/parametres/apropos" element={<AboutPage />} />
                     <Route path="/profil" element={<ProfilePage />} />
-                    <Route path="/transactions/:id" element={<TransactionDetailsPage />} />
+
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>

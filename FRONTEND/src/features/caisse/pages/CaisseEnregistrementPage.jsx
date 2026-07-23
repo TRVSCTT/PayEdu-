@@ -173,11 +173,11 @@ export function CaisseEnregistrementPage() {
               <div className="flex gap-8">
                 {/* Infos */}
                 <div className="flex-1 space-y-4">
-                  <InfoRow label="Bénéficiaire" value="IUT de douala" />
-                  <InfoRow label="Payeur" value="Jack Essomba" />
+                  <InfoRow label="Bénéficiaire" value={selectedPaiement.etablissement_nom || "Non défini"} />
+                  <InfoRow label="Payeur" value={`${selectedPaiement.apprenant_nom || ''} ${selectedPaiement.apprenant_prenom || ''}`.trim() || "Non défini"} />
                   <InfoRow label="Date" value={formatDate(selectedPaiement.created_at)} />
                   <InfoRow label="Heure" value={new Date(selectedPaiement.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} />
-                  <InfoRow label="Lieu" value="Douala" />
+                  <InfoRow label="Lieu" value={selectedPaiement.ville_paiement || "Non défini"} />
                   
                   <div className="flex flex-wrap gap-2 mt-6">
                     <span className="px-4 py-2 border border-text text-text rounded-full text-sm font-medium flex items-center gap-2">

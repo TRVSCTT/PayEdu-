@@ -75,6 +75,12 @@ class PaiementOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class PaiementCaisseOut(PaiementOut):
+    apprenant_nom: Optional[str] = None
+    apprenant_prenom: Optional[str] = None
+    etablissement_nom: Optional[str] = None
+    ville_paiement: Optional[str] = None
+
 
 class WebhookCinetPay(BaseModel):
     """CinetPay poste cpm_trans_id en x-www-form-urlencoded sur ta notify_url.

@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Globe2, Fingerprint, BellRing, ShieldCheck, HelpCircle } from 'lucide-react'
+import { ChevronRight, HelpCircle } from 'lucide-react'
 import { cardStyles, PageHeader, StatusBadge } from '../../../components/ui/designSystem'
+import { useTheme } from '../../../store/themeStore'
 
 export function SettingsPage() {
   const [language, setLanguage] = useState('Français')
-  const [darkMode, setDarkMode] = useState(true)
   const [biometrics, setBiometrics] = useState(true)
   const [location, setLocation] = useState(true)
   const [alerts, setAlerts] = useState(true)
   const [showLanguageModal, setShowLanguageModal] = useState(false)
   const navigate = useNavigate()
+  const { isDarkMode, toggleTheme } = useTheme()
 
   return (
     <div className="space-y-6">
@@ -33,14 +34,17 @@ export function SettingsPage() {
           }
         />
         <SettingRow
-          label="Mode sombre / clair"
-          rightElement={<Toggle isChecked={darkMode} onChange={() => setDarkMode(!darkMode)} />}
+          label="Mode sombre"
+          rightElement={
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-text-muted">
+                {isDarkMode ? 'Activé' : 'Désactivé'}
+              </span>
+              <Toggle isChecked={isDarkMode} onChange={toggleTheme} ariaLabel="Basculer le mode sombre" />
+            </div>
+          }
         />
-        <SettingRow
-          label="Taille de police"
-          rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />}
-          isLast
-        />
+        <SettingRow label="Taille de police" rightElement={<ChevronRight className="h-4 w-4 text-text-muted" />} isLast />
       </SettingsSection>
 
       <SettingsSection title="Permission et sécurité">
@@ -70,7 +74,7 @@ export function SettingsPage() {
                   type="button"
                   onClick={() => setLanguage(item)}
                   className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition ${
-                    language === item ? 'border-primary bg-primary-light' : 'border-border bg-white hover:bg-primary-light/40'
+                    language === item ? 'border-primary bg-primary-light' : 'border-border bg-surface hover:bg-primary-light/40'
                   }`}
                 >
                   <span className="text-base font-semibold text-text">{item}</span>
@@ -101,24 +105,27 @@ function SettingsSection({ title, children }) {
 }
 
 function SettingRow({ label, rightElement, isLast, onClick }) {
+  const Component = onClick ? 'button' : 'div'
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex w-full items-center justify-between gap-4 border-b border-border px-4 py-4 text-left transition hover:bg-primary-light/40 ${
-        isLast ? 'border-b-0' : ''
-      }`}
+    <Component
+      {...(onClick ? { type: 'button', onClick } : {})}
+      className={`flex w-full items-center justify-between gap-4 border-b border-border px-4 py-4 text-left transition ${
+        onClick ? 'hover:bg-primary-light/40' : ''
+      } ${isLast ? 'border-b-0' : ''}`}
     >
       <span className="text-sm font-medium text-text">{label}</span>
       {rightElement}
-    </button>
+    </Component>
   )
 }
 
-function Toggle({ isChecked, onChange }) {
+function Toggle({ isChecked, onChange, ariaLabel }) {
   return (
     <button
       type="button"
+      aria-label={ariaLabel}
+      aria-pressed={isChecked}
       onClick={(e) => {
         e.stopPropagation()
         onChange()

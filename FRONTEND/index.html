@@ -9,6 +9,28 @@
       name="description"
       content="ETUTRANSFERT facilite le paiement sécurisé des frais universitaires, d'examen et de concours."
     />
+    <script>
+      ;(function () {
+        try {
+          var themeStorageKey = 'payedu_theme'
+          var storedTheme = localStorage.getItem(themeStorageKey)
+          var theme =
+            storedTheme === 'light' || storedTheme === 'dark'
+              ? storedTheme
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light'
+
+          document.documentElement.dataset.theme = theme
+          document.documentElement.style.colorScheme = theme
+
+          var themeColorMeta = document.querySelector('meta[name="theme-color"]')
+          if (themeColorMeta) {
+            themeColorMeta.setAttribute('content', theme === 'dark' ? '#0b1220' : '#123B5D')
+          }
+        } catch (error) {}
+      })()
+    </script>
     <title>ETUTRANSFERT</title>
   </head>
   <body>

@@ -30,7 +30,7 @@ export function DashboardLayout({ title, description, actions }) {
 
   return (
     <div className="app-page lg:grid lg:grid-cols-[290px_minmax(0,1fr)]">
-      <aside className="hidden border-r border-border bg-white/90 backdrop-blur lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+      <aside className="hidden border-r border-border bg-surface/90 backdrop-blur lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="flex h-full flex-col px-5 py-6">
           <BrandLink />
           <div className="mt-6 rounded-2xl bg-primary-light p-4">
@@ -86,7 +86,7 @@ export function DashboardLayout({ title, description, actions }) {
       </aside>
 
       <div className="flex min-h-screen flex-col">
-        <header className="border-b border-border bg-white/85 backdrop-blur">
+        <header className="border-b border-border bg-surface/85 backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <BrandLink />

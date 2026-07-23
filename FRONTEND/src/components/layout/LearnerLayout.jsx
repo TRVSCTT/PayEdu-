@@ -36,7 +36,7 @@ export function LearnerLayout() {
   return (
     <div className="app-page flex flex-col">
       {!isProfilePage && (
-        <header className="sticky top-0 z-40 border-b border-border bg-white/90 backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 overflow-hidden rounded-2xl border border-border bg-primary-light">
@@ -57,7 +57,7 @@ export function LearnerLayout() {
 
             <Link
               to="/apprenant/notifications"
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-text transition hover:bg-primary-light"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface text-text transition hover:bg-primary-light"
             >
               <Bell className="h-5 w-5" aria-hidden="true" />
               {unreadNotifications > 0 && (
@@ -74,7 +74,7 @@ export function LearnerLayout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white/95 backdrop-blur">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-surface/95 backdrop-blur">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-5 gap-1 px-2 py-2 pb-safe">
           <NavItem to="/apprenant" icon={Home} label="Accueil" end />
           <NavItem to="/apprenant/paiements" icon={CreditCard} label="Paiement" />

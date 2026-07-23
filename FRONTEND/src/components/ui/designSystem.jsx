@@ -19,7 +19,7 @@ export function cx(...parts) {
 export function buttonStyles({ variant = 'primary', size = 'md', block = false, className = '' } = {}) {
   const variants = {
     primary: 'bg-primary text-white hover:bg-primary-dark shadow-sm',
-    secondary: 'border border-primary/15 bg-white text-primary hover:bg-primary-light',
+    secondary: 'border border-primary/15 bg-surface text-primary hover:bg-primary-light',
     subtle: 'bg-transparent text-text-secondary hover:bg-gray-100',
     danger: 'bg-danger text-white hover:bg-red-700 shadow-sm',
     ghost: 'border border-transparent bg-transparent text-text hover:bg-gray-100',
@@ -153,7 +153,10 @@ export function Money({ value, currency, className = '' }) {
 
 export function Stepper({ steps, currentStep, className = '' }) {
   return (
-    <ol className={cx('grid gap-2 sm:grid-cols-3 lg:grid-cols-6', className)} aria-label="Progression du paiement">
+    <ol
+      className={cx('grid w-full gap-2 [grid-template-columns:repeat(auto-fit,minmax(10rem,1fr))]', className)}
+      aria-label="Progression du paiement"
+    >
       {steps.map((step, index) => {
         const active = index === currentStep
         const complete = index < currentStep
@@ -164,7 +167,7 @@ export function Stepper({ steps, currentStep, className = '' }) {
             key={label}
             className={cx(
               'flex items-center gap-3 rounded-2xl border px-3 py-3 transition-colors',
-              active ? 'border-primary bg-primary-light' : complete ? 'border-success/20 bg-success-light' : 'border-border bg-white',
+              active ? 'border-primary bg-primary-light' : complete ? 'border-success/20 bg-success-light' : 'border-border bg-surface',
             )}
             aria-current={active ? 'step' : undefined}
           >

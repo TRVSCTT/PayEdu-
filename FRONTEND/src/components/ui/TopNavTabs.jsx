@@ -15,7 +15,7 @@ export function TopNavTabs() {
   const currentPath = location.pathname
 
   return (
-    <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-2 shadow-soft sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-surface p-2 shadow-soft sm:grid-cols-4">
       {TABS.map((tab) => {
         const active = currentPath.includes(tab.match)
         const Icon = tab.icon

@@ -12,6 +12,9 @@ import { RegisterAdminPage } from '../../features/auth/pages/RegisterAdminPage'
 import { AdminDashboard } from '../../features/auth/pages/AdminDashboard'
 import { RegisterEstablishmentPage } from '../../features/establishments/pages/RegisterEstablishmentPage'
 import { EstablishmentDashboard } from '../../features/establishments/pages/EstablishmentDashboard'
+import { StudentListPage } from '../../features/establishments/pages/StudentListPage'
+import { EstablishmentPaymentsPage } from '../../features/establishments/pages/EstablishmentPaymentsPage'
+import { FeesManagementPage } from '../../features/establishments/pages/FeesManagementPage'
 import { RegisterCaissePage } from '../../features/establishments/pages/RegisterCaissePage'
 import { CaisseDashboard } from '../../features/caisse/pages/CaisseDashboard'
 import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearnerPage'
@@ -94,6 +97,9 @@ export function AppRouter() {
               <RoleRoute allowedRoles={[USER_ROLES.ESTABLISHMENT_MANAGER]}>
                 <Routes>
                   <Route path="/" element={<EstablishmentDashboard />} />
+                  <Route path="/apprenants" element={<StudentListPage />} />
+                  <Route path="/paiements" element={<EstablishmentPaymentsPage />} />
+                  <Route path="/frais" element={<FeesManagementPage />} />
                   <Route path="/caisses/nouveau" element={<RegisterCaissePage />} />
                   <Route path="/apprenants/nouveau" element={<RegisterLearnerPage />} />
                 </Routes>

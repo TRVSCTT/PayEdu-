@@ -21,6 +21,7 @@ import { EstablishmentPaymentsPage } from '../../features/establishments/pages/E
 import { FeesManagementPage } from '../../features/establishments/pages/FeesManagementPage'
 import { RegisterCaissePage } from '../../features/establishments/pages/RegisterCaissePage'
 import { CaisseDashboard } from '../../features/caisse/pages/CaisseDashboard'
+import { CaisseEnregistrementPage } from '../../features/caisse/pages/CaisseEnregistrementPage'
 import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearnerPage'
 import { LearnerDashboard } from '../../features/learners/pages/LearnerDashboard'
 import { CreatePaymentPage } from '../../features/payments/pages/CreatePaymentPage'
@@ -163,6 +164,7 @@ export function AppRouter() {
               <RoleRoute allowedRoles={[USER_ROLES.CASHIER]}>
                 <Routes>
                   <Route path="/" element={<CaisseDashboard />} />
+                  <Route path="/enregistrements" element={<CaisseEnregistrementPage />} />
                   <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>

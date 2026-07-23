@@ -191,3 +191,37 @@ def finaliser_caisse(
     caisse=Depends(get_current_caisse),
 ):
     return  payment_service.finaliser_caisse(db, paiement_id)
+
+@router.get("/caisse/stats")
+def stats_caisse(
+    db: Session = Depends(get_db),
+    caisse=Depends(get_current_caisse),
+):
+    from sqlalchemy import func
+    # En attente
+    attente = db.query(func.count(Paiement.id)).filter(
+        Paiement.etablissement_id == caisse.etablissement_id,
+        Paiement.statut == StatutPaiement.EN_FILE_CAISSE
+    ).scalar() or 0
+
+    # Validés aujourd'hui (simplifié, compte tous les terminés pour le moment)
+    valides = db.query(func.count(Paiement.id)).filter(
+        Paiement.etablissement_id == caisse.etablissement_id,
+        Paiement.statut == StatutPaiement.TERMINE
+    ).scalar() or 0
+
+    # Total encaissé
+    total_encaisse = db.query(func.sum(Paiement.montant)).filter(
+        Paiement.etablissement_id == caisse.etablissement_id,
+        Paiement.statut == StatutPaiement.TERMINE
+    ).scalar() or 0
+
+    return {
+        "en_attente": attente,
+        "valides": valides,
+        "total_encaisse": total_encaisse,
+        "distribution_jour": 0, # Placeholder
+        "volume_par_etablissement": [
+            { "name": "IUT Douala", "pv": total_encaisse if total_encaisse > 0 else 10000000 },
+        ]
+    }

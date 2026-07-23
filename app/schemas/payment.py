@@ -78,6 +78,7 @@ class PaiementOut(BaseModel):
 class PaiementCaisseOut(PaiementOut):
     apprenant_nom: Optional[str] = None
     apprenant_prenom: Optional[str] = None
+    apprenant_matricule: Optional[str] = None
     etablissement_nom: Optional[str] = None
     ville_paiement: Optional[str] = None
 

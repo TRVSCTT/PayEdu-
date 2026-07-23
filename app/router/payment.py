@@ -181,6 +181,14 @@ def file_attente_caisse(
         p_dict = {c.name: getattr(p, c.name) for c in p.__table__.columns}
         p_dict["apprenant_nom"] = p.apprenant.nom if p.apprenant else None
         p_dict["apprenant_prenom"] = p.apprenant.prenom if p.apprenant else None
+        
+        matricule = None
+        if p.infos_confirmees and "matricule" in p.infos_confirmees:
+            matricule = p.infos_confirmees["matricule"]
+        elif p.infos_extraites and "matricule" in p.infos_extraites:
+            matricule = p.infos_extraites["matricule"]
+        p_dict["apprenant_matricule"] = matricule
+
         p_dict["etablissement_nom"] = p.etablissement.nom if p.etablissement else None
         out.append(PaiementCaisseOut(**p_dict))
     return out

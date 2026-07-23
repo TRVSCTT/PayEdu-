@@ -18,7 +18,7 @@ const MENU_BY_ROLE = {
   ],
 }
 
-export function DashboardLayout({ title, description, actions }) {
+export function DashboardLayout({ title, description, actions, children }) {
   const { user, removeAuthenticationData } = useAuth()
   const navigate = useNavigate()
   const menuItems = MENU_BY_ROLE[user?.role] || []
@@ -125,6 +125,7 @@ export function DashboardLayout({ title, description, actions }) {
             )}
 
             <div className={cx(title || description || actions ? 'mt-6' : '', 'space-y-6')}>
+              {children}
               <Outlet />
             </div>
           </div>

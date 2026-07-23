@@ -50,7 +50,7 @@ export function EstablishmentDashboard() {
           <StatCard 
             icon={FileText} 
             label="Fonds en Attente" 
-            value={formatCurrency(stats?.total_paiements_en_attente || 0)} 
+            value={formatMoney(stats?.total_paiements_en_attente || 0)} 
             helper="Brouillons et paiements en cours" 
             tone="info" 
           />

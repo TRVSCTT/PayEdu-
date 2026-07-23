@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Plus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Plus, X, Loader2 } from 'lucide-react';
 import { cardStyles, buttonStyles, cx } from '../../../components/ui/designSystem';
+import { caisseService } from '../../../services/caisseService';
+import { toast } from 'sonner';
 
 export function GestionEtablissementPage() {
   const navigate = useNavigate();
-  const [selectedEtab, setSelectedEtab] = useState('IUT de Douala');
+  const [selectedEtab, setSelectedEtab] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(0);
+  const [showCollabModal, setShowCollabModal] = useState(false);
+  const [collabEmail, setCollabEmail] = useState('');
 
-  const etablissements = [
-    'IUT de Douala', 'Université de Douala', 'ENSET de Douala', 
-    'ENSPD', 'ESSEC', 'IUC', 'UCAC', 'IUGG', 'DIT', 'ISMA'
-  ];
+  const { data: etablissements = [], isLoading } = useQuery({
+    queryKey: ['caisse-etablissements'],
+    queryFn: caisseService.getEtablissements,
+  });
+
+  const handleSendCollab = () => {
+    if(!collabEmail) return toast.error("Veuillez entrer un identifiant ou email valide.");
+    toast.success(`Demande de collaboration envoyée à ${collabEmail}`);
+    setShowCollabModal(false);
+    setCollabEmail('');
+  };
 
   const events = [
     { title: 'IUT DOUALA', subtitle: "Concours d'entrée 1ère année", date1: '30/06', date2: '20/07' },
@@ -30,8 +42,11 @@ export function GestionEtablissementPage() {
           <h1 className="text-3xl font-bold text-text">Gestion établissement</h1>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-sm font-bold text-text">Demande de collaboration: 02</span>
-          <button className={cx(buttonStyles({ variant: 'primary' }), 'bg-black text-white hover:bg-black/90 flex items-center gap-2')}>
+          <span className="text-sm font-bold text-text">Demande de collaboration: 0</span>
+          <button 
+            onClick={() => setShowCollabModal(true)}
+            className={cx(buttonStyles({ variant: 'primary' }), 'bg-black text-white hover:bg-black/90 flex items-center gap-2')}
+          >
             <Plus className="w-4 h-4" /> Collaboration
           </button>
         </div>
@@ -41,9 +56,9 @@ export function GestionEtablissementPage() {
       <div className="flex gap-4 shrink-0">
         <div className="bg-black text-white rounded-xl flex flex-col justify-center items-center px-4 min-w-[130px] h-[76px]">
           <span className="text-[10px] text-white/80 mb-[2px]">Etablissements</span>
-          <span className="text-sm font-bold leading-none mb-1">10</span>
+          <span className="text-sm font-bold leading-none mb-1">{etablissements.length}</span>
           <span className="text-[9px] text-white/80 mb-[2px]">Total étudiants</span>
-          <span className="text-sm font-bold leading-none">25 000</span>
+          <span className="text-sm font-bold leading-none">-</span>
         </div>
 
         <div className="flex-1 border border-border rounded-2xl p-3 flex flex-col justify-between bg-white">
@@ -69,60 +84,78 @@ export function GestionEtablissementPage() {
             <h3 className="font-bold text-text text-sm">Liste établissements</h3>
           </div>
           <div className="flex-1 overflow-y-auto divide-y divide-border">
-            {etablissements.map((e, i) => (
-               <button 
-                 key={i}
-                 onClick={() => setSelectedEtab(e)}
-                 className={cx("w-full p-4 text-center text-xs font-semibold transition-colors", 
-                 selectedEtab === e ? "bg-black text-white" : "bg-white text-text hover:bg-gray-50")}
-               >
-                 {e}
-               </button>
-            ))}
+            {isLoading ? (
+               <div className="flex justify-center p-4"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+            ) : etablissements.length === 0 ? (
+               <div className="p-4 text-center text-sm text-text-muted">Aucun établissement</div>
+            ) : (
+              etablissements.map((e, i) => {
+                 const isSelected = selectedEtab?.id === e.id || (!selectedEtab && i === 0);
+                 if (i === 0 && !selectedEtab) setTimeout(() => setSelectedEtab(e), 0);
+                 return (
+                   <button 
+                     key={e.id}
+                     onClick={() => setSelectedEtab(e)}
+                     className={cx("w-full p-4 text-center text-xs font-semibold transition-colors", 
+                     isSelected ? "bg-black text-white" : "bg-white text-text hover:bg-gray-50")}
+                   >
+                     {e.nom_etablissement || 'Sans nom'}
+                   </button>
+                 )
+              })
+            )}
           </div>
         </div>
 
         {/* Col 2: Info Etablissement */}
         <div className="flex-[1.2] border border-border rounded-2xl bg-white p-6 flex flex-col overflow-y-auto shrink-0 relative">
-          <h2 className="text-center font-bold text-xl text-text mb-8 px-8 leading-snug">
-            Institue Universitaire de Technologie de Douala
-          </h2>
-          
-          <div className="space-y-4 text-xs text-text flex-1 ml-4">
-            <div>
-              <span className="font-bold">Responsable scolarité :</span><br/>
-              MBARGA BENJAMIN PIERRE AIME
+          {!selectedEtab ? (
+            <div className="flex-1 flex items-center justify-center text-text-muted text-sm">
+              Sélectionnez un établissement
             </div>
-            <div>
-              <span className="font-bold">Nombre approximatif d'étudiants :</span><br/>
-              6 000
-            </div>
-            <div>
-              <span className="font-bold">Phases de paiement :</span><br/>
-              02 - 30/05 au 20/06 et 02/09 au 04/10
-            </div>
-            <div>
-              <span className="font-bold">Frais de paiement :</span><br/>
-              Inscription spéciale - Visite médicale - Tranche1 - Tranche 2 - Carte étudiant
-            </div>
-            <div>
-              <span className="font-bold">Niveau :</span><br/>
-              1 - 2 - 3 - 4 - 5 - 6
-            </div>
-            <div>
-              <span className="font-bold">Ville :</span><br/>
-              Douala, Cameroun
-            </div>
-          </div>
+          ) : (
+            <>
+              <h2 className="text-center font-bold text-xl text-text mb-8 px-8 leading-snug">
+                {selectedEtab.nom_etablissement || 'Nom non défini'}
+              </h2>
+              
+              <div className="space-y-4 text-xs text-text flex-1 ml-4">
+                <div>
+                  <span className="font-bold">Responsable scolarité :</span><br/>
+                  {`${selectedEtab.nom || ''} ${selectedEtab.prenom || ''}`.trim() || 'Non défini'}
+                </div>
+                <div>
+                  <span className="font-bold">Contact :</span><br/>
+                  {selectedEtab.telephone || 'Non défini'} / {selectedEtab.email}
+                </div>
+                <div>
+                  <span className="font-bold">Phases de paiement :</span><br/>
+                  Non défini
+                </div>
+                <div>
+                  <span className="font-bold">Frais de paiement :</span><br/>
+                  Non défini
+                </div>
+                <div>
+                  <span className="font-bold">Niveau :</span><br/>
+                  Non défini
+                </div>
+                <div>
+                  <span className="font-bold">Statut :</span><br/>
+                  Actif
+                </div>
+              </div>
 
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <button className="text-xs text-text-secondary hover:text-text">Arrêter la collaboration</button>
-            <div className="flex gap-4 w-full max-w-[260px]">
-              <button className={cx(buttonStyles({ variant: 'secondary' }), 'flex-1 bg-white border-border py-2')}>Précédent</button>
-              <button className={cx(buttonStyles({ variant: 'primary' }), 'flex-1 bg-black text-white hover:bg-black/90 py-2')}>Suivant</button>
-            </div>
-            <button className="text-xs text-text font-bold mt-2">Fermer</button>
-          </div>
+              <div className="mt-8 flex flex-col items-center gap-4">
+                <button className="text-xs text-text-secondary hover:text-text">Arrêter la collaboration</button>
+                <div className="flex gap-4 w-full max-w-[260px]">
+                  <button className={cx(buttonStyles({ variant: 'secondary' }), 'flex-1 bg-white border-border py-2')}>Précédent</button>
+                  <button className={cx(buttonStyles({ variant: 'primary' }), 'flex-1 bg-black text-white hover:bg-black/90 py-2')}>Suivant</button>
+                </div>
+                <button className="text-xs text-text font-bold mt-2">Fermer</button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Col 3: Events */}
@@ -160,11 +193,52 @@ export function GestionEtablissementPage() {
             ))}
           </div>
 
-          <div className="border-t border-border pt-4 text-[11.5px] leading-relaxed text-text text-justify px-2">
-            <span className="font-bold">L'institut Universitaire de Technologie de Douala</span>, lance son <span className="font-bold">concours d'entrée en niveau 1</span> qui aura lieu <span className="font-bold">mardi 11 janvier 2026</span>. A cet effet les différents candidats devrons s'acquitter de frais d'inscription pour passer les examens. Ils devrons à la banque payer des frais d'inscription à hauteur de <span className="font-bold">10 000 franc cfa</span> et des frais de prise en charge de dossier de <span className="font-bold">5 000 francs cfa</span>. La période de mise en condition s'étend du <span className="font-bold">30/06 au 20/07 2026</span>.
+          <div className="border-t border-border pt-4 text-[11.5px] leading-relaxed text-text text-justify px-2 text-text-muted">
+            Aucun événement détaillé n'est disponible pour l'instant.
           </div>
         </div>
       </div>
+
+      {/* Modal Collaboration */}
+      {showCollabModal && (
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl shadow-xl border border-border p-8 w-full max-w-md relative">
+            <button onClick={() => setShowCollabModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="text-xl font-bold text-text mb-2">Nouvelle collaboration</h3>
+            <p className="text-sm text-text-secondary mb-6">Invitez un établissement partenaire à se connecter à votre caisse pour automatiser le règlement de ses frais.</p>
+            
+            <div className="space-y-4 mb-8">
+              <div>
+                <label className="block text-sm font-medium text-text mb-1">Code ou Email de l'établissement</label>
+                <input 
+                  type="text" 
+                  placeholder="Ex: IUTDOUALA ou contact@iut.cm"
+                  value={collabEmail}
+                  onChange={(e) => setCollabEmail(e.target.value)}
+                  className="app-input w-full"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowCollabModal(false)}
+                className={cx(buttonStyles({ variant: 'secondary' }), 'flex-1 bg-white border-border')}
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={handleSendCollab}
+                className={cx(buttonStyles({ variant: 'primary' }), 'flex-1 bg-black text-white hover:bg-black/90')}
+              >
+                Envoyer la demande
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

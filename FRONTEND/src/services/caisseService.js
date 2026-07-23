@@ -11,6 +11,19 @@ export const caisseService = {
     return response.data;
   },
 
+  getEtablissements: async () => {
+    try {
+      // Pour l'instant on tente d'appeler la route admin. Si la caisse n'a pas les droits, on gérera l'erreur.
+      // Une route dédiée /caisse/etablissements serait préférable côté backend.
+      const response = await apiClient.get('/admin/etablissements');
+      return response.data;
+    } catch (error) {
+      // Fallback vide si erreur de droits
+      console.error("Impossible de récupérer les établissements", error);
+      return [];
+    }
+  },
+
   validatePayment: async (paiementId) => {
     const response = await apiClient.post(`/payments/caisse/${paiementId}/finaliser`);
     return response.data;

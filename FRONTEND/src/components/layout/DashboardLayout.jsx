@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LogOut, School, UserPlus, UserRound, Moon, Sun, MessageSquare, CreditCard } from 'lucide-react'
+import { LayoutDashboard, LogOut, School, UserPlus, UserRound, Moon, Sun, MessageSquare, CreditCard, Users, Calendar, FileBarChart, Home, Settings, HelpCircle } from 'lucide-react'
 import { USER_ROLES } from '../../constants/roles'
 import { useAuth } from '../../store/authStore'
 import { useTheme } from '../../store/themeStore'
@@ -19,7 +19,13 @@ const MENU_BY_ROLE = {
   [USER_ROLES.CASHIER]: [
     { to: '/caisse', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/caisse/enregistrements', label: 'Enregistrement', icon: CreditCard },
-    { to: '/caisse/support', label: 'Aide & Support', icon: MessageSquare },
+    { to: '/caisse/acteurs', label: 'Acteur paiement', icon: Users },
+    { to: '/caisse/agenda', label: 'RDV / Agenda', icon: Calendar },
+    { to: '/caisse/rapports', label: 'States et rapport', icon: FileBarChart },
+    { to: '/caisse/etablissement', label: 'Gestion établissement', icon: Home },
+    { to: '/caisse/messagerie', label: 'Messagerie', icon: MessageSquare },
+    { to: '/caisse/support', label: 'Aide & Support', icon: HelpCircle },
+    { to: '/caisse/parametres', label: 'Paramètre', icon: Settings },
   ],
 }
 

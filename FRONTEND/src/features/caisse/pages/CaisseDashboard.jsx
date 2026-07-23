@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { Download, Filter, RefreshCw, Loader2 } from 'lucide-react';
@@ -7,6 +8,7 @@ import { caisseService } from '../../../services/caisseService';
 import { formatMoney } from '../../../utils/formatters';
 
 export function CaisseDashboard() {
+  const navigate = useNavigate();
   const [filterEtab, setFilterEtab] = useState('Tous');
 
   const { data: stats, isLoading } = useQuery({
@@ -90,10 +92,11 @@ export function CaisseDashboard() {
 
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-text mb-3">Accès rapide</p>
-                <button className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Historique</button>
-                <button className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Nouvelle collab</button>
-                <button className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Signalement</button>
-                <button className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Personnaliser</button>
+                <button onClick={() => navigate('/caisse/acteurs')} className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Acteur paiement</button>
+                <button onClick={() => navigate('/caisse/agenda')} className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>RDV / Agenda</button>
+                <button onClick={() => navigate('/caisse/rapports')} className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Stats et rapport</button>
+                <button onClick={() => navigate('/caisse/etablissement')} className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Gestion établissement</button>
+                <button onClick={() => navigate('/caisse/messagerie')} className={cx(buttonStyles({ variant: 'secondary', block: true }), 'justify-center border-border hover:bg-gray-50')}>Messagerie</button>
               </div>
             </div>
 

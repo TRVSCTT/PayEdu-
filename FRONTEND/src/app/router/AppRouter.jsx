@@ -22,6 +22,11 @@ import { FeesManagementPage } from '../../features/establishments/pages/FeesMana
 import { RegisterCaissePage } from '../../features/establishments/pages/RegisterCaissePage'
 import { CaisseDashboard } from '../../features/caisse/pages/CaisseDashboard'
 import { CaisseEnregistrementPage } from '../../features/caisse/pages/CaisseEnregistrementPage'
+import { ActeurPaiementPage } from '../../features/caisse/pages/ActeurPaiementPage'
+import { AgendaPage } from '../../features/caisse/pages/AgendaPage'
+import { RapportsPage } from '../../features/caisse/pages/RapportsPage'
+import { GestionEtablissementPage } from '../../features/caisse/pages/GestionEtablissementPage'
+import { ParametresCaissePage } from '../../features/caisse/pages/ParametresCaissePage'
 import { RegisterLearnerPage } from '../../features/learners/pages/RegisterLearnerPage'
 import { LearnerDashboard } from '../../features/learners/pages/LearnerDashboard'
 import { CreatePaymentPage } from '../../features/payments/pages/CreatePaymentPage'
@@ -165,6 +170,12 @@ export function AppRouter() {
                 <Routes>
                   <Route path="/" element={<CaisseDashboard />} />
                   <Route path="/enregistrements" element={<CaisseEnregistrementPage />} />
+                  <Route path="/acteurs" element={<ActeurPaiementPage />} />
+                  <Route path="/agenda" element={<AgendaPage />} />
+                  <Route path="/rapports" element={<RapportsPage />} />
+                  <Route path="/etablissement" element={<GestionEtablissementPage />} />
+                  <Route path="/parametres" element={<ParametresCaissePage />} />
+                  <Route path="/messagerie" element={<AdminSupportPage />} />
                   <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>

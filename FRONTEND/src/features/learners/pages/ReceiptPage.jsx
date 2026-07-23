@@ -1,10 +1,26 @@
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, CreditCard, GraduationCap, QrCode, ReceiptText, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, CreditCard, GraduationCap, Download, ReceiptText, ShieldCheck, Loader2 } from 'lucide-react'
 import { buttonStyles, cardStyles, StatusBadge, PageHeader } from '../../../components/ui/designSystem'
 import { formatDate, formatMoney } from '../../../utils/formatters'
+import { generatePDF } from '../../../utils/generatePDF'
 
 export function ReceiptPage() {
   const navigate = useNavigate()
+  const receiptRef = useRef(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+
+  const handleDownloadPDF = async () => {
+    if (!receiptRef.current) return;
+    try {
+      setIsGenerating(true)
+      await generatePDF(receiptRef.current, `Recu_PayEdu_${receiptData.transaction}.pdf`)
+    } catch (error) {
+      console.error('Failed to generate PDF', error)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   const receiptData = {
     nom: 'Dominiek Joël',
@@ -36,58 +52,65 @@ export function ReceiptPage() {
 
       <section className={cardStyles('overflow-hidden p-6 sm:p-8')}>
         <div className="flex flex-col gap-6">
-          <div className="flex items-center gap-4">
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary">
-              <GraduationCap className="h-7 w-7" />
-              <CreditCard className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-white p-0.5 text-primary" />
+          <div ref={receiptRef} className="flex flex-col gap-6 bg-white p-4 -m-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-light text-primary">
+                <GraduationCap className="h-7 w-7" />
+                <CreditCard className="absolute -bottom-1 -left-1 h-4 w-4 rounded-full bg-white p-0.5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold uppercase tracking-[0.18em] text-text">ETUTRANSFERT - IUTD</h1>
+                <p className="text-sm text-text-secondary">Transaction simple, traçable et vérifiable</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-semibold uppercase tracking-[0.18em] text-text">ETUTRANSFERT - IUTD</h1>
-              <p className="text-sm text-text-secondary">Transaction simple, traçable et vérifiable</p>
+
+            <div className="h-px w-full bg-border" />
+
+            <div className="text-center">
+              <StatusBadge status="confirmed" tone="success" />
+              <h2 className="mt-4 text-2xl font-semibold text-text">Reçu de paiement</h2>
+              <p className="mt-2 text-sm text-text-secondary">Document officiel - Validation des frais de paiement</p>
             </div>
-          </div>
 
-          <div className="h-px w-full bg-border" />
-
-          <div className="text-center">
-            <StatusBadge status="confirmed" tone="success" />
-            <h2 className="mt-4 text-2xl font-semibold text-text">Reçu de paiement</h2>
-            <p className="mt-2 text-sm text-text-secondary">Document officiel - Validation des frais de paiement</p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <ReceiptRow label="Nom et prénom" value={receiptData.nom} />
-            <ReceiptRow label="Matricule" value={receiptData.matricule} />
-            <ReceiptRow label="Filière" value={receiptData.filiere} />
-            <ReceiptRow label="Montant payé" value={formatMoney(receiptData.montant)} highlight />
-            <ReceiptRow label="Objectif" value={receiptData.objectif} />
-            <ReceiptRow label="N° de transaction" value={receiptData.transaction} />
-            <ReceiptRow label="Date et heure du rendez-vous" value={receiptData.dateRdv} />
-            <ReceiptRow label="Lieu" value={receiptData.lieu} />
-            <ReceiptRow label="Date d’émission" value={receiptData.dateEmission} />
-          </div>
-
-          <div className="grid gap-4 border-t border-border pt-6 sm:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-background p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Vérification</p>
-              <p className="mt-2 text-sm font-semibold text-text">Code QR ou référence</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ReceiptRow label="Nom et prénom" value={receiptData.nom} />
+              <ReceiptRow label="Matricule" value={receiptData.matricule} />
+              <ReceiptRow label="Filière" value={receiptData.filiere} />
+              <ReceiptRow label="Montant payé" value={formatMoney(receiptData.montant)} highlight />
+              <ReceiptRow label="Objectif" value={receiptData.objectif} />
+              <ReceiptRow label="N° de transaction" value={receiptData.transaction} />
+              <ReceiptRow label="Date et heure du rendez-vous" value={receiptData.dateRdv} />
+              <ReceiptRow label="Lieu" value={receiptData.lieu} />
+              <ReceiptRow label="Date d’émission" value={receiptData.dateEmission} />
             </div>
-            <div className="rounded-2xl border border-border bg-background p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Statut</p>
-              <p className="mt-2"><StatusBadge status="confirmed" tone="success" /></p>
-            </div>
-            <div className="rounded-2xl border border-border bg-background p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Date</p>
-              <p className="mt-2 text-sm font-semibold text-text">{formatDate(receiptData.dateEmission, { dateStyle: 'long' })}</p>
+
+            <div className="grid gap-4 border-t border-border pt-6 sm:grid-cols-3">
+              <div className="rounded-2xl border border-border bg-background p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Vérification</p>
+                <p className="mt-2 text-sm font-semibold text-text">Code QR ou référence</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-background p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Statut</p>
+                <p className="mt-2"><StatusBadge status="confirmed" tone="success" /></p>
+              </div>
+              <div className="rounded-2xl border border-border bg-background p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Date</p>
+                <p className="mt-2 text-sm font-semibold text-text">{formatDate(receiptData.dateEmission, { dateStyle: 'long' })}</p>
+              </div>
             </div>
           </div>
 
           <div className="grid gap-3 border-t border-border pt-6 sm:grid-cols-3">
-            <button onClick={() => window.print()} className={buttonStyles({ variant: 'primary', block: true })}>
+            <button onClick={() => window.print()} className={buttonStyles({ variant: 'secondary', block: true })}>
               Imprimer
             </button>
-            <button className={buttonStyles({ variant: 'secondary', block: true })}>
-              Partager
+            <button 
+              onClick={handleDownloadPDF} 
+              disabled={isGenerating}
+              className={buttonStyles({ variant: 'primary', block: true })}
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
+              Télécharger PDF
             </button>
             <button className={buttonStyles({ variant: 'secondary', block: true })}>
               <ShieldCheck className="h-4 w-4" />

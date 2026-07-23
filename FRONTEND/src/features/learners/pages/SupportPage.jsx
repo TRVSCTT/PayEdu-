@@ -45,8 +45,8 @@ export function SupportPage() {
       </section>
 
       <div className="space-y-3">
-        <button onClick={() => navigate('/apprenant/parametres/assistant')} className={buttonStyles({ variant: 'primary', size: 'lg', block: true })}>
-          Contacter l'assistant
+        <button onClick={() => navigate('/apprenant/support')} className={buttonStyles({ variant: 'primary', size: 'lg', block: true })}>
+          Contacter le support client
         </button>
         <button className={buttonStyles({ variant: 'secondary', size: 'lg', block: true })}>Guide utilisateur</button>
       </div>

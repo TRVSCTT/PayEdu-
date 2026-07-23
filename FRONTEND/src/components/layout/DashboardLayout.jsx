@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LogOut, School, UserPlus, UserRound, Moon, Sun } from 'lucide-react'
+import { LayoutDashboard, LogOut, School, UserPlus, UserRound, Moon, Sun, MessageSquare } from 'lucide-react'
 import { USER_ROLES } from '../../constants/roles'
 import { useAuth } from '../../store/authStore'
 import { useTheme } from '../../store/themeStore'
@@ -9,13 +9,16 @@ const MENU_BY_ROLE = {
   [USER_ROLES.ADMIN]: [
     { to: '/admin', label: 'Tableau de bord', icon: LayoutDashboard, end: true },
     { to: '/admin/etablissements/nouveau', label: 'Nouvel établissement', icon: School },
+    { to: '/admin/support', label: 'Support Client', icon: MessageSquare },
   ],
   [USER_ROLES.ESTABLISHMENT_MANAGER]: [
     { to: '/etablissement', label: 'Tableau de bord', icon: LayoutDashboard, end: true },
     { to: '/etablissement/apprenants/nouveau', label: 'Nouvel apprenant', icon: UserPlus },
+    { to: '/etablissement/support', label: 'Support Client', icon: MessageSquare },
   ],
   [USER_ROLES.CASHIER]: [
     { to: '/caisse', label: 'Tableau de bord', icon: LayoutDashboard, end: true },
+    { to: '/caisse/support', label: 'Support Client', icon: MessageSquare },
   ],
 }
 

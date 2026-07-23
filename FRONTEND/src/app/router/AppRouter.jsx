@@ -12,6 +12,8 @@ import { RegisterAdminPage } from '../../features/auth/pages/RegisterAdminPage'
 import { AdminDashboard } from '../../features/auth/pages/AdminDashboard'
 import { EstablishmentListPage } from '../../features/auth/pages/EstablishmentListPage'
 import { AdminPaymentsPage } from '../../features/auth/pages/AdminPaymentsPage'
+import { LearnerSupportPage } from '../../features/support/pages/LearnerSupportPage'
+import { AdminSupportPage } from '../../features/support/pages/AdminSupportPage'
 import { RegisterEstablishmentPage } from '../../features/establishments/pages/RegisterEstablishmentPage'
 import { EstablishmentDashboard } from '../../features/establishments/pages/EstablishmentDashboard'
 import { StudentListPage } from '../../features/establishments/pages/StudentListPage'
@@ -88,6 +90,7 @@ export function AppRouter() {
                   <Route path="/etablissements" element={<EstablishmentListPage />} />
                   <Route path="/paiements" element={<AdminPaymentsPage />} />
                   <Route path="/etablissements/nouveau" element={<RegisterEstablishmentPage />} />
+                  <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>
             </ProtectedRoute>
@@ -106,6 +109,7 @@ export function AppRouter() {
                   <Route path="/frais" element={<FeesManagementPage />} />
                   <Route path="/caisses/nouveau" element={<RegisterCaissePage />} />
                   <Route path="/apprenants/nouveau" element={<RegisterLearnerPage />} />
+                  <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>
             </ProtectedRoute>
@@ -137,11 +141,13 @@ export function AppRouter() {
                     <Route path="/recu" element={<ReceiptPage />} />
                     <Route path="/documents" element={<DocumentsPage />} />
                     <Route path="/parametres" element={<SettingsPage />} />
+                    <Route path="/support" element={<LearnerSupportPage />} />
                     <Route path="/parametres/support" element={<SupportPage />} />
                     <Route path="/parametres/assistant" element={<ChatAssistantPage />} />
                     <Route path="/parametres/controle" element={<VerificationRequestPage />} />
                     <Route path="/parametres/apropos" element={<AboutPage />} />
                     <Route path="/profil" element={<ProfilePage />} />
+                    <Route path="/transactions/:id" element={<TransactionDetailsPage />} />
                   </Route>
                   <Route path="/notifications" element={<NotificationsPage />} />
                 </Routes>
@@ -157,6 +163,7 @@ export function AppRouter() {
               <RoleRoute allowedRoles={[USER_ROLES.CASHIER]}>
                 <Routes>
                   <Route path="/" element={<CaisseDashboard />} />
+                  <Route path="/support" element={<AdminSupportPage />} />
                 </Routes>
               </RoleRoute>
             </ProtectedRoute>

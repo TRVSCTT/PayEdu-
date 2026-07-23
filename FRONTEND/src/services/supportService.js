@@ -13,5 +13,16 @@ export const supportService = {
   recupererMessages: async () => {
     const response = await apiClient.get('/support/messages');
     return response.data;
+  },
+
+  getConversations: async () => {
+    const response = await apiClient.get('/support/conversations');
+    return response.data;
+  },
+
+  getConversationDetails: async (apprenantId) => {
+    if (!apprenantId) return [];
+    const response = await apiClient.get(`/support/conversations/${apprenantId}`);
+    return response.data;
   }
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, NavLink, Link, useLocation } from 'react-router-dom'
-import { Bell, CreditCard, FileText, Home, Settings, User } from 'lucide-react'
+import { Bell, CreditCard, FileText, Home, Settings, User, MessageSquare } from 'lucide-react'
 import { useAuth } from '../../store/authStore'
 import { paymentService } from '../../services/paymentService'
 import { notificationService } from '../../services/notificationService'
@@ -79,7 +79,7 @@ export function LearnerLayout() {
           <NavItem to="/apprenant" icon={Home} label="Accueil" end />
           <NavItem to="/apprenant/paiements" icon={CreditCard} label="Paiement" />
           <NavItem to="/apprenant/documents" icon={FileText} label="Documents" />
-          <NavItem to="/apprenant/parametres" icon={Settings} label="Réglages" />
+          <NavItem to="/apprenant/support" icon={MessageSquare} label="Support" />
           <NavItem to="/apprenant/profil" icon={User} label="Profil" />
         </div>
       </nav>
